@@ -31,7 +31,8 @@ void reset(void);
 #define	DIO_PIN		11
 #define	SCK_PIN		13
 
-#ifdef __AVR_ATmega1280__
+// #ifdef __AVR_ATmega1280__
+#ifdef __AVR_ATmega2560__
 	//*	Arduino Mega bit numbers
 	#define LCD_RES		        5		// D8
 	#define CS			6		// D9
