@@ -23,7 +23,7 @@ void reset(void);
 //*		it worked first shot on the Mega.
 //************************************************************************
 //*	these define the PORT and BIT number for each control pin
-#define _USE_ARDUINO_FOR_NOKIEA_
+#define _USE_ARDUINO_FOR_NOKIA_
 
 //*	Arduino pin number defs
 #define	LCD_RES_PIN	8
@@ -34,7 +34,7 @@ void reset(void);
 // #ifdef __AVR_ATmega1280__
 #ifdef __AVR_ATmega2560__
 	//*	Arduino Mega bit numbers
-	#define LCD_RES		        5		// D8
+    #define LCD_RES		5		// D8
 	#define CS			6		// D9
 	#define DIO			5		// D11
 	#define SCK			7		// D13
@@ -46,7 +46,7 @@ void reset(void);
 	#define	LCD_PORT_DIO	PORTB
 #else
 	//*	Arduino Duemilanove bit numbers
-	#define LCD_RES		        0		// D8
+    #define LCD_RES		0		// D8
 	#define CS			1		// D9
 	#define DIO			3		// D11
 	#define SCK			5		// D13
@@ -63,10 +63,13 @@ void reset(void);
 /* Old
 #define CS			2		// D10
 #define SCK			3		// D11
-#define LCD_RES		        1		// D9
+#define LCD_RES		1		// D9
 #define DIO			4		// D12
 #define LCD_PORT	        PORTB
 */
+
+
+
 
 //*******************************************************
 //						Macros

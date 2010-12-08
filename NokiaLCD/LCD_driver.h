@@ -175,7 +175,7 @@ void LCDPutStr(char *pString, int x, int y, int Size, int fColor, int bColor);
 //*******************************************************
 #define WHITE	0xFFF
 #define BLACK	0x000
-#define RED	0xF00
+#define RED	    0xF00
 #define	GREEN	0x0F0
 #define BLUE	0x00F
 #define CYAN	0x0FF
