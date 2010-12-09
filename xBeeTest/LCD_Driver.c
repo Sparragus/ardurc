@@ -102,17 +102,6 @@ unsigned int i;
 
 		LCDCommand(RAMWR);
 	#endif
-	#ifdef	PHILLIPS
-		LCDCommand(PASETP);
-		LCDData(0);
-		LCDData(131);
-	
-		LCDCommand(CASETP);
-		LCDData(0);
-		LCDData(131);
-
-		LCDCommand(RAMWRP);
-	#endif
 	
     // This loop goes from 0 to 131 because that's the amount of pixels
     // in a column or row. We want to color all 132*132 pixels. However,
@@ -269,140 +258,31 @@ void LCDInit(void)
 	LCDCommand(OSCON);		// internal oscialltor ON(EPSON)
 	
 	LCDCommand(SLPOUT);		// sleep out(EPSON)
-    LCDCommand(P_SLEEPOUT);	//sleep out(PHILLIPS)
 	
 	LCDCommand(PWRCTR);		// power ctrl(EPSON)
 	LCDData(0x0F);			//everything on, no external reference resistors
-    LCDCommand(P_BSTRON);	//Booset On(PHILLIPS)
 	
-	LCDCommand(DISINV);		// invert display mode(EPSON)
-    LCDCommand(P_INVON);	// invert display mode(PHILLIPS)
-	
+    LCDCommand(DISINV);		// invert display mode(EP	
 	LCDCommand(DATCTL);		// data control(EPSON)
-	LCDData(0x03);			// correct for normal sin7
+    LCDData(0x03);			// correct for normal sin7
 	LCDData(0x00);			// normal RGB arrangement
 	//LCDData(0x01);		// 8-bit Grayscale
 	LCDData(0x02);			// 16-bit Grayscale Type A
-	
-	LCDCommand(P_MADCTL);	//Memory Access Control(PHILLIPS)
-	LCDData(0xC8);
-	
-	LCDCommand(P_COLMOD);	// Set Color Mode(PHILLIPS)
-	LCDData(0x02);	
 	
 	LCDCommand(VOLCTR);		// electronic volume, this is the contrast/brightness(EPSON)
 	//LCDData(0x18);		// volume (contrast) setting - fine tuning, original
 	LCDData(0x24);			// volume (contrast) setting - fine tuning, original
 	LCDData(0x03);			// internal resistor ratio - coarse adjustment
-	LCDCommand(P_SETCON);	        // Set Contrast(PHILLIPS)
-	LCDData(0x30);	
 	
 	LCDCommand(NOP);		// nop(EPSON)
-	LCDCommand(P_NOP);		// nop(PHILLIPS)
 	
 	delay_ms(200);
 
-	LCDCommand(DISON);		// display on(EPSON)
-	LCDCommand(P_DISPON);	// display on(PHILLIPS)
+    LCDCommand(DISON);		// display on(EPSON)
 
         
 }
 
-
-//************************************************************************
-//Usage: LCDPrintLogo();
-//Inputs: None
-//Outputs: None
-//Description: Prints the logo_spark array to the LCD.
-//************************************************************************
-/*
-
-void LCDPrintLogo(void)
-{
-	int x = 4, y = 25, logo_ix = 0, z;
-	char logo;
-	
-	for (logo_ix = 0; logo_ix < 1120; logo_ix++)
-	{
-		logo = logo_spark[logo_ix];
-		for (z = 0; z < 8; z++)
-		{
-			if ((logo & 0x80) == 0x80)
-			{
-			//	LCDSetPixel(RED, y, x);
-				LCDSetPixel(RED, x, y);
-			}
-			x++;
-			if (x == 132)
-			{
-				x = 4;
-				y++;
-			}
-			
-			logo <<= 1;
-		}
-	}
-
-}
-
-*/
-
-//************************************************************************
-//Usage: LCDSetPixel(white, 0, 0);
-//Inputs: unsigned char color - desired color of the pixel
-//			unsigned char x - Page address of pixel to be colored
-//			unsigned char y - column address of pixel to be colored
-//Outputs: None
-//Description: Sets the starting page(row) and column (x & y) coordinates in ram,
-//				then writes the colour to display memory.	The ending x & y are left
-//				maxed out so one can continue sending colour data bytes to the 'open'
-//				RAMWR command to fill further memory.	issuing any red command
-//				finishes RAMWR.
-//**NOTE** Because this function is static, it is essentially a "private" function
-//		and can only be used within this file!
-//*	Apr  3,	2010	<MLS> Made LCDSetPixel public
-//************************************************************************
-void LCDSetPixel(int color, unsigned char x, unsigned char y)
-{
-int	myYYvalue;
-
-//*	Apr  3,	2010	<MLS> This is to make it "RIGHT" side up
-	
-	myYYvalue	=	(COL_HEIGHT - 1) - y;
-
-	#ifdef EPSON
-		LCDCommand(PASET);	// page start/end ram
-		LCDData(x);
-		LCDData(ENDPAGE);
-	
-		LCDCommand(CASET);	// column start/end ram
-		LCDData(myYYvalue);
-		LCDData(ENDCOL);
-	
-		LCDCommand(RAMWR);	// write
-		LCDData((color>>4)&0x00FF);
-		LCDData(((color&0x0F)<<4)|(color>>8));
-		LCDData(color&0x0FF);		// nop(EPSON)		
-		//LCDData(color);
-		//LCDData(NOP);
-		//LCDData(NOP);
-	#endif
-	#ifdef	PHILLIPS
-		LCDCommand(PASETP);	// page start/end ram
-		LCDData(x);
-		LCDData(ENDPAGE);
-	
-		LCDCommand(CASETP);	// column start/end ram
-		LCDData(myYYvalue);
-		LCDData(ENDCOL);
-	
-		LCDCommand(RAMWRP);	// write
-		
-		LCDData((unsigned char)((color>>4)&0x00FF));
-		LCDData((unsigned char)(((color&0x0F)<<4)|0x00));
-	#endif
-
-}
 
 
 
@@ -529,20 +409,32 @@ void LCDPutChar(char c, int x, int y, int size, int fColor, int bColor) {
   nBytes = pgm_read_byte(&*(pFont + 2));   // Array Flash
 
   /* get pointer to the last byte of the desired character */
-  //pChar = pFont + (nBytes * (c - 0x1F)) + nBytes - 1;
+  // pChar = pFont + (nBytes * (c - 0x1F)) + nBytes - 1;
+  //
+  // 0x1F is the US (Unit Separator) character. It also the last character before 'normal'
+  // characters start. The first 'normal' character is the 'space' character, 0x20.
+  // Because the Font table we use starts with the 'space' character, we need to 'fix'
+  // that offset.
   pChar = pFont + (nBytes * (c - 0x1F));
+
   // Row address set (command 0x2B)
+  // Data1 = Starting x address
+  // Data2 = Ending x address
   LCDCommand(PASET);
   LCDData(x);
   LCDData(x + nRows - 1);
+  // LCDData(x + ENDPAGE + nRows - 1);
 
   // Column address set (command 0x2A)
+  // Data1 = Starting y address
+  // Data2 = Ending y address
   LCDCommand(CASET);
   LCDData(y);
   LCDData(y + nCols - 1);
 
-  // WRITE MEMORY
+  // Commit/Write to memory PASET and CASET data
   LCDCommand(RAMWR);
+
   // loop on each row, working backwards from the bottom to the top
   for (i = nRows - 1; i >= 0; i--) 
   {
@@ -569,7 +461,7 @@ void LCDPutChar(char c, int x, int y, int size, int fColor, int bColor) {
       else
         Word1 = fColor;
       Mask = Mask >> 1;
-      
+
       // use this information to output three data bytes
       // For some reason, it has to send blue first then green and red
       LCDData((Word0 << 4) | ((Word0 & 0xF0) >> 4));
@@ -605,9 +497,9 @@ void LCDPutChar(char c, int x, int y, int size, int fColor, int bColor) {
 // *************************************************************************************************
 void LCDPutStr(char *pString, int x, int y, int Size, int fColor, int bColor) {
     // loop until null-terminator is seen
+    // http://en.wikipedia.org/wiki/Null_terminator
     while (*pString != 0x00) {
       // draw the character
-//      LCDPutChar(*pString++, x, y, Size, fColor, bColor);
       LCDPutChar(*pString++, x, y, Size, fColor, bColor);
 
 /*

@@ -1,9 +1,57 @@
-// Are these two even needed?
+#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 
 #include "LCD_Geometry.h"
 #include "LCD_Driver.h"
+
+//************************************************************************
+//Usage: LCDSetPixel(white, 0, 0);
+//Inputs: unsigned char color - desired color of the pixel
+//			unsigned char x - Page address of pixel to be colored
+//			unsigned char y - column address of pixel to be colored
+//Outputs: None
+//Description: Sets the starting page(row) and column (x & y) coordinates in ram,
+//				then writes the colour to display memory.	The ending x & y are left
+//				maxed out so one can continue sending colour data bytes to the 'open'
+//				RAMWR command to fill further memory.	issuing any red command
+//				finishes RAMWR.
+//**NOTE** Because this function is static, it is essentially a "private" function
+//		and can only be used within this file!
+//*	Apr  3,	2010	<MLS> Made LCDSetPixel public
+//************************************************************************
+void LCDSetPixel(int color, unsigned char x, unsigned char y)
+{
+    int newX;
+    int	newY;
+
+//*	Apr  3,	2010	<MLS> This is to make it "RIGHT" side up
+	
+    newX = (ROW_LENGTH - 1) - x;
+	newY = (COL_HEIGHT - 1) - y;
+
+	#ifdef EPSON
+		LCDCommand(PASET);	// page start/end ram
+		LCDData(newY);
+		LCDData(ENDPAGE);
+	
+		LCDCommand(CASET);	// column start/end ram
+		LCDData(newX);
+		LCDData(ENDCOL);
+	
+		LCDCommand(RAMWR);	// write
+		LCDData((color>>4)&0x00FF);
+		LCDData(((color&0x0F)<<4)|(color>>8));
+		LCDData(color&0x0FF);		// nop(EPSON)		
+		//LCDData(color);
+		//LCDData(NOP);
+		//LCDData(NOP);
+	#endif
+}
 
 
 // *************************************************************************************************
@@ -149,7 +197,7 @@ void LCDSetLine(int x0, int y0, int x1, int y1, int color) {
 // Author: James P Lynch July 7, 2007
 // *****************************************************************************************
 
-void LCDSetRect(int x0, int y0, int x1, int y1, unsigned char fill, int color) {
+void LCDSetRect(int x0, int y0, int width, int height, unsigned char fill, int color) {
   int xmin, xmax, ymin, ymax;
   int i;
 
@@ -162,19 +210,30 @@ void LCDSetRect(int x0, int y0, int x1, int y1, unsigned char fill, int color) {
     xmax = (x0 > x1) ? x0 : x1;
     ymin = (y0 <= y1) ? y0 : y1;
     ymax = (y0 > y1) ? y0 : y1;
+
+    // int newXMin = (ROW_LENGTH - 1) - xmin;
+    // int newXMax = (ROW_LENGTH - 1) - xmax;
+    int newXMin = xmin;
+    int newXMax = xmax;
+
+    // int newYMin = (COL_HEIGHT - 1) - ymin;
+    // int newYMax = (COL_HEIGHT - 1) - ymax;
+    int newYMin = ymin;
+    int newYMax = ymax;
+
     // specify the controller drawing box according to those limits
     // Row address set (command 0x2B)
     LCDCommand(PASET);
-    LCDData(xmin);
-    LCDData(xmax);
+    LCDData(newXMin);
+    LCDData(newXMax);
     // Column address set (command 0x2A)
     LCDCommand(CASET);
-    LCDData(ymin);
-    LCDData(ymax);
+    LCDData(newYMin);
+    LCDData(newYMax);
     // WRITE MEMORY
     LCDCommand(RAMWR);
     // loop on total number of pixels / 2
-    for (i = 0; i < ((((xmax - xmin + 1) * (ymax - ymin + 1)) / 2) + 1); i++) {
+    for (i = 0; i < ((((newXMax - newXMin + 1) * (newYMax - newYMin + 1)) / 2) + 1); i++) {
     // use the color value to output three data bytes covering two pixels
       LCDData((color >> 4) & 0xFF);
       LCDData(((color & 0xF) << 4) | ((color >> 8) & 0xF));

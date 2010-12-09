@@ -1,5 +1,6 @@
 #include "LCD_Driver.h"
 #include "LCD_Pins.h"
+#include "LCD_Geometry.h"
 
 #define __DEBUG
 
@@ -19,8 +20,33 @@ void setup()
     LCDClear(WHITE);
 
     #ifdef __DEBUG
-        char someString[] = "another string!";
-        printString(someString, 10, 10);
+
+        //char someString[] = "another string!";
+        //printString(someString, 10, 10);
+
+
+        int sizeX = 42;
+        int sizeY = 42;
+
+        // SetPixel - OKAY
+        LCDSetPixel(RED, 100, 10);
+        
+        // SetLine - OKAY
+        LCDSetLine(10, 10, sizeX, sizeY, RED);
+        
+        // SetRect, NOFILL - OKAY
+        LCDSetRect(10, 10 , sizeX, sizeY, NOFILL, RED);
+        
+        // SetRect, FILL - WRONG
+        LCDSetRect(10, 10 , sizeX, sizeY, FILL, RED);
+
+        // PutStr - WRONG
+        LCDPutStr("RIGHT", 10, ENDCOL - 10, LARGE, BLACK, WHITE);
+        LCDPutStr("LEFT", 10, 10, LARGE, BLACK, WHITE);
+        
+        // PutChar - WRONG
+        LCDPutChar('#', 60, 10, LARGE, BLACK, WHITE);
+        LCDPutChar('*', 60, 110, LARGE, BLACK, WHITE);
     #endif
 }
 
