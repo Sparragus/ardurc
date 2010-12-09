@@ -215,7 +215,7 @@ void LCDSetRect(int x0, int y0, int width, int height, unsigned char fill, int c
 
     int newXMin = (ROW_LENGTH - 1) - xMax;
     int newXMax = (ROW_LENGTH - 1) - xMin;
-    // int newXMax = (ROW_LENGTH - 1) - xMax;
+    // int newXMin = (ROW_LENGTH - 1) - xMin;
     // int newXMax = (ROW_LENGTH - 1) - xMax;
     // int newXMin = xMin;
     // int newXMax = xMax;
@@ -230,12 +230,12 @@ void LCDSetRect(int x0, int y0, int width, int height, unsigned char fill, int c
     // specify the controller drawing box according to those limits
     // Row address set (command 0x2B)
     LCDCommand(PASET);
-    LCDData(newXMin);
-    LCDData(newXMax);
-    // Column address set (command 0x2A)
-    LCDCommand(CASET);
     LCDData(newYMin);
     LCDData(newYMax);
+    // Column address set (command 0x2A)
+    LCDCommand(CASET);
+    LCDData(newXMin);
+    LCDData(newXMax);
     // WRITE MEMORY
     LCDCommand(RAMWR);
     // loop on total number of pixels / 2
