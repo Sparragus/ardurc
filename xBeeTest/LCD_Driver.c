@@ -521,13 +521,13 @@ void LCDPutStr(char *pString, int x, int y, int Size, int fColor, int bColor) {
 */
 //<MLS> changed the coordinate system to "RIGHT" side up. Needed to adjust code below so characters would not print backwards
       // advance the y position
-      if (Size == SMALL)
-          y = y - 6;
-      else if (Size == MEDIUM)
-          y = y - 8;
-      else
-          y = y - 8;
-
+      // if (Size == SMALL)
+          // y = y - 6;
+      // else if (Size == MEDIUM)
+          // y = y - 8;
+      // else
+          // y = y - 8;
+    x = x + 8;
 
       // bail out if y exceeds 131
       if (y > 131) break;
