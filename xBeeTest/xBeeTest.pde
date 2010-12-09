@@ -25,8 +25,8 @@ void setup()
         //printString(someString, 10, 10);
 
 
-        int sizeX = 42;
-        int sizeY = 42;
+        int sizeX = 40;
+        int sizeY = 40;
 
         // SetPixel - OKAY
         LCDSetPixel(RED, 100, 10);
@@ -37,7 +37,7 @@ void setup()
         // SetRect, NOFILL - OKAY
         LCDSetRect(10, 10 , sizeX, sizeY, NOFILL, RED);
         
-        // SetRect, FILL - WRONG
+        // SetRect, FILL - OKAY
         LCDSetRect(10, 10 , sizeX, sizeY, FILL, RED);
 
         // PutStr - WRONG

@@ -198,28 +198,34 @@ void LCDSetLine(int x0, int y0, int x1, int y1, int color) {
 // *****************************************************************************************
 
 void LCDSetRect(int x0, int y0, int width, int height, unsigned char fill, int color) {
-  int xmin, xmax, ymin, ymax;
+  int xMin, xMax, yMin, yMax;
   int i;
+
+    // calculate the Min and Max for x and y directions
+    xMin = (width < 0) ? x0 + width : x0;
+    xMax = (width >= 0) ? x0 + width : x0;
+    yMin = (height < 0) ? y0 + height : y0;
+    yMax = (height >= 0) ? y0 + height : y0;
 
   // check if the rectangle is to be filled
   if (fill == FILL) {
   // best way to create a filled rectangle is to define a drawing box
   // and loop two pixels at a time
-  // calculate the min and max for x and y directions
-    xmin = (x0 <= x1) ? x0 : x1;
-    xmax = (x0 > x1) ? x0 : x1;
-    ymin = (y0 <= y1) ? y0 : y1;
-    ymax = (y0 > y1) ? y0 : y1;
 
-    // int newXMin = (ROW_LENGTH - 1) - xmin;
-    // int newXMax = (ROW_LENGTH - 1) - xmax;
-    int newXMin = xmin;
-    int newXMax = xmax;
 
-    // int newYMin = (COL_HEIGHT - 1) - ymin;
-    // int newYMax = (COL_HEIGHT - 1) - ymax;
-    int newYMin = ymin;
-    int newYMax = ymax;
+    int newXMin = (ROW_LENGTH - 1) - xMax;
+    int newXMax = (ROW_LENGTH - 1) - xMin;
+    // int newXMax = (ROW_LENGTH - 1) - xMax;
+    // int newXMax = (ROW_LENGTH - 1) - xMax;
+    // int newXMin = xMin;
+    // int newXMax = xMax;
+
+    int newYMin = (COL_HEIGHT - 1) - yMax;
+    int newYMax = (COL_HEIGHT - 1) - yMin;
+    // int newYMin = (COL_HEIGHT - 1) - yMin;
+    // int newYMax = (COL_HEIGHT - 1) - yMax;
+    // int newYMin = yMin;
+    // int newYMax = yMax;
 
     // specify the controller drawing box according to those limits
     // Row address set (command 0x2B)
@@ -241,10 +247,15 @@ void LCDSetRect(int x0, int y0, int width, int height, unsigned char fill, int c
      }
     } else {
     // best way to draw un unfilled rectangle is to draw four lines
-    LCDSetLine(x0, y0, x1, y0, color);
-    LCDSetLine(x0, y1, x1, y1, color);
-    LCDSetLine(x0, y0, x0, y1, color);
-    LCDSetLine(x1, y0, x1, y1, color);
+    LCDSetLine(xMin, yMin, xMax, yMin, color);
+    LCDSetLine(xMin, yMax, xMax, yMax, color);
+    LCDSetLine(xMin, yMin, xMin, yMax, color);
+    LCDSetLine(xMax, yMin, xMax, yMax, color);
+
+    // LCDSetLine(x0, y0, x1, y0, color);
+    // LCDSetLine(x0, y1, x1, y1, color);
+    // LCDSetLine(x0, y0, x0, y1, color);
+    // LCDSetLine(x1, y0, x1, y1, color);
   }
 }
 
