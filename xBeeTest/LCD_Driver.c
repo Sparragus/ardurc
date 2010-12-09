@@ -421,16 +421,23 @@ void LCDPutChar(char c, int x, int y, int size, int fColor, int bColor) {
   // Data1 = Starting x address
   // Data2 = Ending x address
   LCDCommand(PASET);
-  LCDData(x);
-  LCDData(x + nRows - 1);
+  LCDData(ROW_LENGTH - (y + nRows - 1));
+  LCDData(ROW_LENGTH - y);
+  // LCDData(ROW_LENGTH - x);
+  // LCDData(ROW_LENGTH - (x + nRows - 1));
+  // LCDData(x);
+  // LCDData(x + nRows - 1);
+
   // LCDData(x + ENDPAGE + nRows - 1);
 
   // Column address set (command 0x2A)
   // Data1 = Starting y address
   // Data2 = Ending y address
   LCDCommand(CASET);
-  LCDData(y);
-  LCDData(y + nCols - 1);
+  LCDData(COL_HEIGHT - (x + nCols - 1));
+  LCDData(COL_HEIGHT - x);
+  // LCDData(y);
+  // LCDData(y + nCols - 1);
 
   // Commit/Write to memory PASET and CASET data
   LCDCommand(RAMWR);

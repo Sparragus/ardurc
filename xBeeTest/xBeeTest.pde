@@ -25,29 +25,31 @@ void setup()
         //printString(someString, 10, 10);
 
 
-        int sizeX = 40;
-        int sizeY = 70;
+        //int sizeX = 40;
+        //int sizeY = 70;
 
-        // SetPixel - OKAY
-        LCDSetPixel(RED, 100, 10);
+        //SetPixel - OKAY
+        //LCDSetPixel(RED, 100, 10);
         
-        // SetLine - OKAY
-        //LCDSetLine(10, 10, sizeX + 10, sizeY + 10, RED);
-        LCDSetLine(30, 10, 30, sizeY + 10, BLACK);
+        //SetLine - OKAY
+        //LCDSetLine(30, 10, 30, sizeY + 10, BLACK);
         
-        // SetRect, NOFILL - OKAY
-        LCDSetRect(10, 10 , sizeX, sizeY, NOFILL, RED);
+        //SetRect, NOFILL - OKAY
+        //LCDSetRect(10, 10 , sizeX, sizeY, NOFILL, RED);
         
-        // SetRect, FILL - OKAY
-        LCDSetRect(60, 10 , sizeX, COL_HEIGHT - 20, FILL, RED);
+        //SetRect, FILL - OKAY
+        //LCDSetRect(60, 10 , sizeX, COL_HEIGHT - 20, FILL, RED);
 
-        // PutStr - WRONG
-        LCDPutStr("RIGHT", 10, ENDCOL - 10, LARGE, BLACK, WHITE);
-        LCDPutStr("LEFT", 10, 10, LARGE, BLACK, WHITE);
         
         // PutChar - WRONG
-        LCDPutChar('#', 60, 10, LARGE, BLACK, WHITE);
-        LCDPutChar('*', 60, 110, LARGE, BLACK, WHITE);
+        // * should be on the right
+        LCDPutChar('*', 100, 10, LARGE, BLACK, WHITE);
+        // # should be on the left
+        LCDPutChar('#', 20, 10, LARGE, BLACK, WHITE);
+
+        // PutStr - WRONG
+        //LCDPutStr("RIGHT", ROW_LENGTH, COL_HEIGHT - 10, LARGE, BLACK, WHITE);
+        //LCDPutStr("LEFT", 10, 10, LARGE, BLACK, WHITE);
     #endif
 }
 
