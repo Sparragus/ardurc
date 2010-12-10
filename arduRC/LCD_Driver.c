@@ -471,9 +471,12 @@ void LCDPutChar(char c, int x, int y, int size, int fColor, int bColor) {
 
       // use this information to output three data bytes
       // For some reason, it has to send blue first then green and red
-      LCDData((Word0 << 4) | ((Word0 & 0xF0) >> 4));
-      LCDData(((Word0 >> 4) & 0xF0) | (Word1 & 0x0F));
-      LCDData((Word1 & 0xF0) | (Word1 >> 8));
+      // LCDData((Word0 << 4) | ((Word0 & 0xF0) >> 4));
+      // LCDData(((Word0 >> 4) & 0xF0) | (Word1 & 0x0F));
+      // LCDData((Word1 & 0xF0) | (Word1 >> 8));
+      LCDData((Word0 >> 4) & 0x0FF);
+      LCDData(((Word0 & 0x00F) << 4) | (Word1 >> 8));
+      LCDData((Word1 & 0x0FF));
     }
   }
 

@@ -66,8 +66,8 @@ void LCDPutStr(char *pString, int x, int y, int Size, int fColor, int bColor);
 #define EPMWR       0xFC
 #define EPMRD       0xFD
 #define EPSRRD1     0x7C
-#define EPSRRD2     0x7D
 #define NOP         0x25
+#define EPSRRD2     0x7D
 
  
 // Backlight control   

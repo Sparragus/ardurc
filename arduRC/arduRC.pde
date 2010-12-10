@@ -62,7 +62,7 @@ void setup()
         LCDPutStr("LEFT", 2, COL_HEIGHT - 16, LARGE, BLACK, WHITE);
 
         Serial.println("Screen test: Finished!");
-        delay(1000);
+        delay(500);
 
         Serial.println("MVC test: Started!");
         currentState = DEBUG;
