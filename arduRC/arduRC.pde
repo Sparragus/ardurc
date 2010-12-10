@@ -2,7 +2,13 @@
 #include "LCD_Pins.h"
 #include "LCD_Geometry.h"
 
-//#define __DEBUG
+#include "arduRC_states.h"
+#include "arduRC_controller.h"
+
+#define __DEBUG
+
+int currentState;
+int states[] = {MAIN, SPEED, ALTITUDE, GPS, TEMP, DEBUG};
 
 void setup()
 {
@@ -17,11 +23,13 @@ void setup()
 
     // Init LCD
     LCDInit();
-    LCDClear(BLACK);
+    LCDClear(WHITE);
 
     #ifdef __DEBUG
         //char someString[] = "another string!";
         //printString(someString, 10, 10);
+
+        Serial.println("Screen test: Started!");
 
         //SetPixel - OKAY
         LCDSetPixel(RED, ROW_LENGTH/2, COL_HEIGHT/2 - 10); // North
@@ -52,6 +60,16 @@ void setup()
         // PutStr - OKAY
         LCDPutStr("RIGHT", ROW_LENGTH - 5*8, COL_HEIGHT - 16, LARGE, BLACK, WHITE);
         LCDPutStr("LEFT", 2, COL_HEIGHT - 16, LARGE, BLACK, WHITE);
+
+        Serial.println("Screen test: Finished!");
+        delay(1000);
+
+        Serial.println("MVC test: Started!");
+        currentState = DEBUG;
+        controller(currentState);
+        Serial.println("MVC test: Finished!");
+        
+
     #endif
 }
 
@@ -71,4 +89,9 @@ void ioInit()
     #endif
 
     //No need to define pins for xBee. It uses RX/TX
+}
+
+int stateManager(int state)
+{
+    return 0;
 }
