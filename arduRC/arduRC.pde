@@ -28,7 +28,7 @@ void setup()
     Serial.begin(9600);
     Serial.println("Initialized Serial0!");
 
-    Serial1.begin(9600);
+    Serial1.begin(115200);
     Serial1.println("Initialized Serial1!");
 
     // Initializes IO pins
