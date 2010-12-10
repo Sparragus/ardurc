@@ -14,6 +14,7 @@
 extern "C" {
 #endif
 
+void mainModel();
 void speedModel();
 void altitudeModel();
 void gpsModel();

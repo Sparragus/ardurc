@@ -15,8 +15,8 @@
 extern "C" {
 #endif
 
-void mainView();
-void speedView();
+void mainView(char *screenTitle, char *information, char *prevScreen, char *nextScreen);
+void speedView(char *screenTitle, char *information, char *prevScreen, char *nextScreen);
 void altitudeView();
 void gpsView();
 void tempView();

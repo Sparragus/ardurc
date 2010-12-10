@@ -7,8 +7,21 @@
 
 #define __DEBUG
 
-int currentState;
-int states[] = {MAIN, SPEED, ALTITUDE, GPS, TEMP, DEBUG};
+#define BUTTON_LEFT 21
+#define BUTTON_RIGHT 20
+
+const int LEFT = 0;
+const int RIGHT = 1;
+
+#ifdef __DEBUG
+    int states[] = {MAIN, SPEED, DEBUG};
+#else
+    int states[] = {MAIN, SPEED, ALTITUDE, GPS, TEMP, DEBUG};
+#endif
+
+int statesLen = sizeof(states)/sizeof(int);
+int currentState = states[0];
+int currentStatePos = 0;
 
 void setup()
 {
@@ -64,10 +77,10 @@ void setup()
         Serial.println("Screen test: Finished!");
         delay(500);
 
-        Serial.println("MVC test: Started!");
-        currentState = DEBUG;
-        controller(currentState);
-        Serial.println("MVC test: Finished!");
+        //Serial.println("MVC test: Started!");
+        //currentState = DEBUG;
+        //controller(currentState);
+        //Serial.println("MVC test: Finished!");
         
 
     #endif
@@ -75,7 +88,8 @@ void setup()
 
 void loop()
 {
-
+    //currentState = stateManager(currentState);
+    controller(currentState);
 }
 
 void ioInit()
@@ -89,9 +103,72 @@ void ioInit()
     #endif
 
     //No need to define pins for xBee. It uses RX/TX
+
+    //Ports for ISR for Buttons
+    //Pins 2-3, 18-21
+    pinMode(BUTTON_LEFT, INPUT);
+    digitalWrite(BUTTON_LEFT, HIGH);
+    attachInterrupt(2, buttonLeft, FALLING);
+    pinMode(BUTTON_RIGHT, INPUT);
+    digitalWrite(BUTTON_RIGHT, HIGH);
+    attachInterrupt(3, buttonRight, FALLING);
 }
 
-int stateManager(int state)
+void stateManager(int dir)
 {
-    return 0;
+    if(dir == LEFT)
+    {
+        if(currentState == states[0])
+        {
+            currentStatePos = statesLen - 1;
+            currentState = states[currentStatePos];
+            
+        }
+        else
+        {
+            currentStatePos--;
+            currentState = states[currentStatePos];
+        }
+    }
+    else if(dir == RIGHT)
+    {
+        if(currentState == states[statesLen - 1])
+        {
+            currentStatePos = 0;
+            currentState = states[currentStatePos];
+        }
+        else
+        {
+            currentStatePos++;
+            currentState = states[currentStatePos];
+        }
+    }
+}
+
+void buttonLeft()
+{
+    static unsigned long last_millis = 0;
+    unsigned long m = millis();
+    if (m - last_millis < 200)
+    {
+    
+    }
+    else{
+        last_millis = m;
+        stateManager(LEFT);
+    }
+}
+
+void buttonRight()
+{
+    static unsigned long last_millis = 0;
+    unsigned long m = millis();
+    if (m - last_millis < 200)
+    {
+    
+    }
+    else{
+        last_millis = m;
+        stateManager(RIGHT);
+    }
 }
