@@ -4,6 +4,7 @@
 #include "arduRC_templates.h"
 #include "LCD_Geometry.h"
 #include "LCD_Driver.h"
+#include "WProgram.h"
 
 void basicTemplate(char *screenTitle, char *information, char *prevScreen, char *nextScreen)
 {
@@ -41,5 +42,18 @@ void basicTemplate(char *screenTitle, char *information, char *prevScreen, char 
     centerX = ROW_LENGTH/4 + ROW_LENGTH/2;
     centerY = COL_HEIGHT - (20 - 20/4);
     LCDPutStr(nextScreen, centerX - strlen(nextScreen)/2*8+2, centerY, MEDIUM, WHITE, RED);
+
+    //delay(500);
 }
 
+void infoTemplate(char *information)
+{
+    int centerX = ROW_LENGTH/2;
+    int centerY = COL_HEIGHT/2;
+
+    //Clear previous information
+    LCDSetRect(0, centerY - 9, ROW_LENGTH-1, 2*9, FILL, WHITE);
+    //Information
+    LCDPutStr(information, centerX - strlen(information)/2*8, centerY - 8, LARGE, WHITE, RED);
+    delay(200);
+}

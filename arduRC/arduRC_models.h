@@ -14,13 +14,13 @@
 extern "C" {
 #endif
 
-void mainModel();
-void speedModel();
-void altitudeModel();
-void gpsModel();
-void tempModel();
+void mainModel(bool updated);
+void speedModel(bool updated);
+void altitudeModel(bool updated);
+void gpsModel(bool updated);
+void tempModel(bool updated);
 
-void debugModel();
+void debugModel(bool updated);
 
 #ifdef __cplusplus
 }

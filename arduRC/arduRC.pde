@@ -5,7 +5,7 @@
 #include "arduRC_states.h"
 #include "arduRC_controller.h"
 
-#define __DEBUG
+#define __DEBUG 
 
 #define BUTTON_LEFT 21
 #define BUTTON_RIGHT 20
@@ -21,6 +21,7 @@ const int RIGHT = 1;
 
 int statesLen = sizeof(states)/sizeof(int);
 int currentState = states[0];
+int oldState = currentState; 
 int currentStatePos = 0;
 
 void setup()
@@ -38,69 +39,95 @@ void setup()
     LCDInit();
     LCDClear(WHITE);
 
-    #ifdef __DEBUG
-        //char someString[] = "another string!";
-        //printString(someString, 10, 10);
+#ifdef __DEBUG
+    //char someString[] = "another string!";
+    //printString(someString, 10, 10);
 
-        Serial.println("Screen test: Started!");
+    Serial.println("Screen test: Started!");
 
-        //SetPixel - OKAY
-        LCDSetPixel(RED, ROW_LENGTH/2, COL_HEIGHT/2 - 10); // North
-        LCDSetPixel(RED, ROW_LENGTH/2 + 10, COL_HEIGHT/2); // East
-        LCDSetPixel(RED, ROW_LENGTH/2, COL_HEIGHT/2 + 10); // South
-        LCDSetPixel(RED, ROW_LENGTH/2 - 10, COL_HEIGHT/2); // West
-    
-        //SetLine - OKAY
-        LCDSetLine(ROW_LENGTH/2 - 15, COL_HEIGHT/2 - 15, ROW_LENGTH/2 + 15, COL_HEIGHT/2 + 15, BLACK);
-        LCDSetLine(ROW_LENGTH/2 + 15, COL_HEIGHT/2 - 15, ROW_LENGTH/2 - 15, COL_HEIGHT/2 + 15, RED);
-        
-        //SetRect, NOFILL - OKAY
-        LCDSetRect(ROW_LENGTH/2 - 20, COL_HEIGHT/2 - 20, 20*2, 20*2, NOFILL, ORANGE);
-        
-        //SetRect, FILL - OKAY
-        LCDSetRect(ROW_LENGTH/2 - 5, COL_HEIGHT/2 - 35, 5*2, 5*2, FILL, GREEN);
-        LCDSetRect(ROW_LENGTH/2 + 25, COL_HEIGHT/2 - 5, 5*2, 5*2, FILL, BLUE);
-        LCDSetRect(ROW_LENGTH/2 - 5, COL_HEIGHT/2 + 25, 5*2, 5*2, FILL, YELLOW);
-        LCDSetRect(ROW_LENGTH/2 - 35, COL_HEIGHT/2 - 5, 5*2, 5*2, FILL, RED);
+    //SetPixel - OKAY
+    LCDSetPixel(RED, ROW_LENGTH/2, COL_HEIGHT/2 - 10); // North
+    LCDSetPixel(RED, ROW_LENGTH/2 + 10, COL_HEIGHT/2); // East
+    LCDSetPixel(RED, ROW_LENGTH/2, COL_HEIGHT/2 + 10); // South
+    LCDSetPixel(RED, ROW_LENGTH/2 - 10, COL_HEIGHT/2); // West
 
-        
-        // PutChar - OKAY
-        // * should be on the right
-        LCDPutChar('*', ROW_LENGTH - 5*8, COL_HEIGHT - 16*2, LARGE, BLACK, WHITE);
-        // # should be on the left
-        LCDPutChar('#', 2 + 4*8 - 1*8, COL_HEIGHT - 16*2, LARGE, BLACK, WHITE);
+    //SetLine - OKAY
+    LCDSetLine(ROW_LENGTH/2 - 15, COL_HEIGHT/2 - 15, ROW_LENGTH/2 + 15, COL_HEIGHT/2 + 15, BLACK);
+    LCDSetLine(ROW_LENGTH/2 + 15, COL_HEIGHT/2 - 15, ROW_LENGTH/2 - 15, COL_HEIGHT/2 + 15, RED);
 
-        // PutStr - OKAY
-        LCDPutStr("RIGHT", ROW_LENGTH - 5*8, COL_HEIGHT - 16, LARGE, BLACK, WHITE);
-        LCDPutStr("LEFT", 2, COL_HEIGHT - 16, LARGE, BLACK, WHITE);
+    //SetRect, NOFILL - OKAY
+    LCDSetRect(ROW_LENGTH/2 - 20, COL_HEIGHT/2 - 20, 20*2, 20*2, NOFILL, ORANGE);
 
-        Serial.println("Screen test: Finished!");
-        delay(500);
+    //SetRect, FILL - OKAY
+    LCDSetRect(ROW_LENGTH/2 - 5, COL_HEIGHT/2 - 35, 5*2, 5*2, FILL, GREEN);
+    LCDSetRect(ROW_LENGTH/2 + 25, COL_HEIGHT/2 - 5, 5*2, 5*2, FILL, BLUE);
+    LCDSetRect(ROW_LENGTH/2 - 5, COL_HEIGHT/2 + 25, 5*2, 5*2, FILL, YELLOW);
+    LCDSetRect(ROW_LENGTH/2 - 35, COL_HEIGHT/2 - 5, 5*2, 5*2, FILL, RED);
 
-        //Serial.println("MVC test: Started!");
-        //currentState = DEBUG;
-        //controller(currentState);
-        //Serial.println("MVC test: Finished!");
-        
 
-    #endif
+    // PutChar - OKAY
+    // * should be on the right
+    LCDPutChar('*', ROW_LENGTH - 5*8, COL_HEIGHT - 16*2, LARGE, BLACK, WHITE);
+    // # should be on the left
+    LCDPutChar('#', 2 + 4*8 - 1*8, COL_HEIGHT - 16*2, LARGE, BLACK, WHITE);
+
+    // PutStr - OKAY
+    LCDPutStr("RIGHT", ROW_LENGTH - 5*8, COL_HEIGHT - 16, LARGE, BLACK, WHITE);
+    LCDPutStr("LEFT", 2, COL_HEIGHT - 16, LARGE, BLACK, WHITE);
+
+    Serial.println("Screen test: Finished!");
+    delay(500);
+
+    //Serial.println("MVC test: Started!");
+    //currentState = DEBUG;
+    //controller(currentState);
+    //Serial.println("MVC test: Finished!");
+
+
+#endif
 }
 
 void loop()
 {
-    //currentState = stateManager(currentState);
-    controller(currentState);
+    if (stateChanged())
+    {
+        controller(currentState, true);
+    }
+    else
+    {
+        controller(currentState, false);
+    }
+}
+
+void batteryStatus()
+{
+// Code goes here!!!
+}
+
+void signalStatus()
+{
+// Code goes here!!!
+}
+
+bool stateChanged()
+{
+    if (oldState == currentState)
+    {
+        return false;
+    }
+    oldState = currentState;
+    return true;
 }
 
 void ioInit()
 {
-    #ifdef _USE_ARDUINO_FOR_NOKIA_
-        // IOInit the LCD control lines
-        pinMode(CS_PIN,			OUTPUT);
-        pinMode(DIO_PIN,		OUTPUT);
-        pinMode(SCK_PIN,		OUTPUT);
-        pinMode(LCD_RES_PIN,	OUTPUT);
-    #endif
+#ifdef _USE_ARDUINO_FOR_NOKIA_
+    // IOInit the LCD control lines
+    pinMode(CS_PIN,			OUTPUT);
+    pinMode(DIO_PIN,		OUTPUT);
+    pinMode(SCK_PIN,		OUTPUT);
+    pinMode(LCD_RES_PIN,	OUTPUT);
+#endif
 
     //No need to define pins for xBee. It uses RX/TX
 
@@ -122,7 +149,7 @@ void stateManager(int dir)
         {
             currentStatePos = statesLen - 1;
             currentState = states[currentStatePos];
-            
+
         }
         else
         {
@@ -151,7 +178,7 @@ void buttonLeft()
     unsigned long m = millis();
     if (m - last_millis < 200)
     {
-    
+
     }
     else{
         last_millis = m;
@@ -165,7 +192,7 @@ void buttonRight()
     unsigned long m = millis();
     if (m - last_millis < 200)
     {
-    
+
     }
     else{
         last_millis = m;

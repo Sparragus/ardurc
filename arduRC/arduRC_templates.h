@@ -15,6 +15,7 @@ extern "C" {
 #endif
         //int stringSize(char* string);
         void basicTemplate(char *screenTitle, char *information, char *prevScreen, char *nextScreen);
+        void infoTemplate(char *information);
 
 #ifdef __cplusplus
 }

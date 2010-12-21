@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-void controller(int state);
+void controller(int state, bool updated);
 
 #ifdef __cplusplus
 }

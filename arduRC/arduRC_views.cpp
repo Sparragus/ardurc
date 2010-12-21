@@ -3,36 +3,67 @@
 #include "arduRC_views.h"
 #include "arduRC_templates.h"
 
-void mainView(char *screenTitle, char *information, char *prevScreen, char *nextScreen)
+void mainView(char *information)
+{
+    infoTemplate(information);
+}
+
+void mainViewUpdate(char *screenTitle, char *information, char *prevScreen, char *nextScreen)
 {
     basicTemplate(screenTitle, information, prevScreen, nextScreen);
 }
 
-void speedView(char *screenTitle, char *information, char *prevScreen, char *nextScreen)
+void speedView(char *information)
 {
-    basicTemplate(screenTitle, information, prevScreen, nextScreen);
-}
-void altitudeView()
-{
-
+    infoTemplate(information);
 }
 
-void gpsView()
-{
 
-}
-
-void tempView()
-{
-
-}
-
-void debugView(char *screenTitle, char *information, char *prevScreen, char *nextScreen)
+void speedViewUpdate(char *screenTitle, char *information, char *prevScreen, char *nextScreen)
 {
     basicTemplate(screenTitle, information, prevScreen, nextScreen);
 }
 
-/* 
- * Templates
- */
+void altitudeView(char *information)
+{
+    infoTemplate(information);
+}
+
+
+void altitudeViewUpdate(char *screenTitle, char *information, char *prevScreen, char *nextScreen)
+{
+    basicTemplate(screenTitle, information, prevScreen, nextScreen);
+}
+
+void gpsView(char *information)
+{
+    infoTemplate(information);
+}
+
+
+void gpsViewUpdate(char *screenTitle, char *information, char *prevScreen, char *nextScreen)
+{
+    basicTemplate(screenTitle, information, prevScreen, nextScreen);
+}
+
+void tempView(char *information)
+{
+    infoTemplate(information);
+}
+
+
+void tempViewUpdate(char *screenTitle, char *information, char *prevScreen, char *nextScreen)
+{
+    basicTemplate(screenTitle, information, prevScreen, nextScreen);
+}
+
+void debugView(char *information)
+{
+    infoTemplate(information);
+}
+
+void debugViewUpdate(char *screenTitle, char *information, char *prevScreen, char *nextScreen)
+{
+    basicTemplate(screenTitle, information, prevScreen, nextScreen);
+}
 
