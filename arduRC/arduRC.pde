@@ -136,6 +136,7 @@ void ioInit()
     pinMode(BUTTON_LEFT, INPUT);
     digitalWrite(BUTTON_LEFT, HIGH);
     attachInterrupt(2, buttonLeft, FALLING);
+
     pinMode(BUTTON_RIGHT, INPUT);
     digitalWrite(BUTTON_RIGHT, HIGH);
     attachInterrupt(3, buttonRight, FALLING);
