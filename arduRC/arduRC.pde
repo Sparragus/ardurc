@@ -1,5 +1,3 @@
-//Hello world (:
-
 #include "LCD_Driver.h"
 #include "LCD_Pins.h"
 #include "LCD_Geometry.h"
@@ -35,9 +33,9 @@
 //const int RIGHT = 1;
 
 #ifdef __DEBUG
-    int states[] = {MAIN, SPEED, DEBUG};
+int states[] = {MAIN, SPEED, DEBUG};
 #else
-    int states[] = {MAIN, SPEED, ALTITUDE, GPS, TEMP, DEBUG};
+int states[] = {MAIN, SPEED, ALTITUDE, GPS, TEMP, DEBUG};
 #endif
 
 int statesLen = sizeof(states)/sizeof(int);
@@ -49,6 +47,8 @@ int currentStatePos = 0;
 int batt_status = 0;
 int signal_status = 0;
 int throttle_status = 0;
+
+int throttle_value = 0;
 
 void setup()
 {
@@ -123,30 +123,35 @@ void loop()
     {
         controller(currentState, false);
     }
+
+
+    throttle();
+    batteryStatus();
+    signalStatus();
 }
 
 void batteryStatus()
 {
 
-	batt_status = map(analogRead(battPin),0,1023,0,3);
-	
-   if(batt_status == 3){
-    digitalWrite(batt_red_led, LOW);
-    digitalWrite(batt_green_led, LOW);
-    digitalWrite(batt_blue_led, HIGH);
-  } 
+    batt_status = map(analogRead(batt_status_in),0,1023,0,3);
 
-  if(batt_status == 2){
-    digitalWrite(batt_red_led, LOW);
-    digitalWrite(batt_green_led, HIGH);
-    digitalWrite(batt_blue_led, LOW);
-  } 
+    if(batt_status == 3){
+        digitalWrite(batt_red_led, LOW);
+        digitalWrite(batt_green_led, HIGH);
+        digitalWrite(batt_blue_led, LOW);
+    } 
 
-  if(batt_status == 1){
-    digitalWrite(batt_red_led, HIGH);
-    digitalWrite(batt_green_led, LOW);
-    digitalWrite(batt_blue_led, LOW);
-  } 
+    else if(batt_status == 2){
+        digitalWrite(batt_red_led, LOW);
+        digitalWrite(batt_green_led, LOW);
+        digitalWrite(batt_blue_led, HIGH);
+    } 
+    // if  (batt_status == 1){
+    else{
+        digitalWrite(batt_red_led, HIGH);
+        digitalWrite(batt_green_led, LOW);
+        digitalWrite(batt_blue_led, LOW);
+    } 
 
 
 
@@ -154,38 +159,37 @@ void batteryStatus()
 
 void signalStatus()
 {
-	signal_status = pulseIn(signal_rssi, LOW, 200);
-	
-	if(signal_status <= 35){ //high
-    digitalWrite(signal_led_red, LOW);
-    digitalWrite(signal_led_green, HIGH);
-    digitalWrite(signal_led_blue, LOW);
-  }
-  else if(signal_status > 35 && signal_status < 39){ //medium
-    digitalWrite(signal_led_red, LOW);
-    digitalWrite(signal_led_green, LOW);
-    digitalWrite(signal_led_blue, HIGH);
-  }
-  //if(rssiDur >= 39){ //low
+    signal_status = pulseIn(signal_rssi, LOW, 200);
+
+    if(signal_status <= 35){ //high
+        digitalWrite(signal_led_red, LOW);
+        digitalWrite(signal_led_green, HIGH);
+        digitalWrite(signal_led_blue, LOW);
+    }
+    else if(signal_status > 35 && signal_status < 39){ //medium
+        digitalWrite(signal_led_red, LOW);
+        digitalWrite(signal_led_green, LOW);
+        digitalWrite(signal_led_blue, HIGH);
+    }
+    //if(rssiDur >= 39){ //low
     else{
-    digitalWrite(signal_led_red, HIGH);
-    digitalWrite(signal_led_green, LOW);
-    digitalWrite(signal_led_blue, LOW);
-  }
+        digitalWrite(signal_led_red, HIGH);
+        digitalWrite(signal_led_green, LOW);
+        digitalWrite(signal_led_blue, LOW);
+    }
 
 }
 
 void throttle(){
-	int throttle_value = analogRead(throttle_pot);
-	throttle_led(throttle_value);
-
+    throttle_value = analogRead(throttle_pot);
+    throttle_led_func(throttle_value);
 }
 
-void throttle_led(int throttle_value){
+void throttle_led_func(int throttle_value){
 
-	throttle_status = map(throttle_value, 0, 1023, 255, 0); 
-	analogWrite(potLED,throttle_status);
-	
+    throttle_status = map(throttle_value, 0, 1023, 255, 0); 
+    analogWrite(throttle_led,throttle_status);
+
 }
 
 bool stateChanged()
@@ -219,20 +223,20 @@ void ioInit()
     pinMode(BUTTON_RIGHT, INPUT);
     digitalWrite(BUTTON_RIGHT, HIGH);
     attachInterrupt(3, buttonRight, FALLING);
-	
-	//Set pinMode for throttle potenciometer and led indicator
-	pinMode(throttle_pot, INPUT);
-	pinMode(throttle_led, OUTPUT);
-	//Set pinMode for battery indicators
-	pinMode(batt_blue_led, OUTPUT);
-	pinMode(batt_green_led, OUTPUT);
-	pinMode(batt_red_led, OUTPUT);
-	pinMode(batt_status_in, INPUT);
-	//set pinMode for xbee signal indicators and rssi pin
-	pinMode(signal_blue_led, OUTPUT);
-	pinMode(signal_green_led, OUTPUT);
-	pinMode(signal_red_led, OUTPUT);
-	pinMode(signal_rssi, INPUT);
+
+    //Set pinMode for throttle potenciometer and led indicator
+    pinMode(throttle_pot, INPUT);
+    pinMode(throttle_led, OUTPUT);
+    //Set pinMode for battery indicators
+    pinMode(batt_red_led, OUTPUT);
+    pinMode(batt_green_led, OUTPUT);
+    pinMode(batt_blue_led, OUTPUT);
+    pinMode(batt_status_in, INPUT);
+    //set pinMode for xbee signal indicators and rssi pin
+    pinMode(signal_led_red, OUTPUT);
+    pinMode(signal_led_green, OUTPUT);
+    pinMode(signal_led_blue, OUTPUT);
+    pinMode(signal_rssi, INPUT);
 
 }
 
