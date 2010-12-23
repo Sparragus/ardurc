@@ -1,3 +1,5 @@
+//Hello world (:
+
 #include "LCD_Driver.h"
 #include "LCD_Pins.h"
 #include "LCD_Geometry.h"
