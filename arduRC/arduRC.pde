@@ -134,11 +134,11 @@ void ioInit()
     //Ports for ISR for Buttons
     //Pins 2-3, 18-21
     pinMode(BUTTON_LEFT, INPUT);
-    digitalWrite(BUTTON_LEFT, HIGH);
+    //digitalWrite(BUTTON_LEFT, HIGH);
     attachInterrupt(2, buttonLeft, FALLING);
 
     pinMode(BUTTON_RIGHT, INPUT);
-    digitalWrite(BUTTON_RIGHT, HIGH);
+    //digitalWrite(BUTTON_RIGHT, HIGH);
     attachInterrupt(3, buttonRight, FALLING);
 }
 
@@ -175,28 +175,28 @@ void stateManager(int dir)
 
 void buttonLeft()
 {
-    static unsigned long last_millis = 0;
-    unsigned long m = millis();
-    if (m - last_millis < 200)
-    {
+    //static unsigned long last_millis = 0;
+    //unsigned long m = millis();
+    //if (m - last_millis < 200)
+    //{
 
-    }
-    else{
-        last_millis = m;
+    //}
+    //else{
+        //last_millis = m;
         stateManager(LEFT);
-    }
+    //}
 }
 
 void buttonRight()
 {
-    static unsigned long last_millis = 0;
-    unsigned long m = millis();
-    if (m - last_millis < 200)
-    {
+    //static unsigned long last_millis = 0;
+    //unsigned long m = millis();
+    //if (m - last_millis < 200)
+    //{
 
-    }
-    else{
-        last_millis = m;
+    //}
+    //else{
+        //last_millis = m;
         stateManager(RIGHT);
-    }
+    //}
 }
