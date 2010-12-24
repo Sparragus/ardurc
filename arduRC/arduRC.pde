@@ -10,27 +10,21 @@
 #define BUTTON_LEFT 21
 #define BUTTON_RIGHT 20
 
-#define throttle_pot A0
-#define throttle_led 7
-
-#define batt_status_in A2
-
-#define batt_blue_led 36
-#define batt_green_led 38
-#define batt_red_led 40
-
-#define signal_led_blue 37
-#define signal_led_green 39
-#define signal_led_red 41
-#define signal_rssi A1
-
-
 #define LEFT 0
 #define RIGHT 1
 
-//TODO: Remove the lines below in the defines above work!
-//const int LEFT = 0;
-//const int RIGHT = 1;
+#define throttle_pot A0
+#define throttle_led 7
+
+#define signal_rssi A1
+#define signal_led_red 41
+#define signal_led_green 39
+#define signal_led_blue 37
+
+#define batt_status_in A2
+#define batt_led_red 40
+#define batt_led_green 38
+#define batt_led_blue 36
 
 #ifdef __DEBUG
 int states[] = {MAIN, SPEED, DEBUG};
@@ -136,21 +130,21 @@ void batteryStatus()
     batt_status = map(analogRead(batt_status_in),0,1023,0,3);
 
     if(batt_status == 3){
-        digitalWrite(batt_red_led, LOW);
-        digitalWrite(batt_green_led, HIGH);
-        digitalWrite(batt_blue_led, LOW);
+        digitalWrite(batt_led_red, LOW);
+        digitalWrite(batt_led_green, HIGH);
+        digitalWrite(batt_led_blue, LOW);
     } 
 
     else if(batt_status == 2){
-        digitalWrite(batt_red_led, LOW);
-        digitalWrite(batt_green_led, LOW);
-        digitalWrite(batt_blue_led, HIGH);
+        digitalWrite(batt_led_red, LOW);
+        digitalWrite(batt_led_green, LOW);
+        digitalWrite(batt_led_blue, HIGH);
     } 
     // if  (batt_status == 1){
     else{
-        digitalWrite(batt_red_led, HIGH);
-        digitalWrite(batt_green_led, LOW);
-        digitalWrite(batt_blue_led, LOW);
+        digitalWrite(batt_led_red, HIGH);
+        digitalWrite(batt_led_green, LOW);
+        digitalWrite(batt_led_blue, LOW);
     } 
 
 
@@ -186,10 +180,8 @@ void throttle(){
 }
 
 void throttle_led_func(int throttle_value){
-
     throttle_status = map(throttle_value, 0, 1023, 255, 0); 
     analogWrite(throttle_led,throttle_status);
-
 }
 
 bool stateChanged()
@@ -228,9 +220,9 @@ void ioInit()
     pinMode(throttle_pot, INPUT);
     pinMode(throttle_led, OUTPUT);
     //Set pinMode for battery indicators
-    pinMode(batt_red_led, OUTPUT);
-    pinMode(batt_green_led, OUTPUT);
-    pinMode(batt_blue_led, OUTPUT);
+    pinMode(batt_led_red, OUTPUT);
+    pinMode(batt_led_green, OUTPUT);
+    pinMode(batt_led_blue, OUTPUT);
     pinMode(batt_status_in, INPUT);
     //set pinMode for xbee signal indicators and rssi pin
     pinMode(signal_led_red, OUTPUT);
