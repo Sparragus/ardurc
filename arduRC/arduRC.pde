@@ -50,7 +50,8 @@ int oldState = currentState;
 int currentStatePos = 0;
 
 //gyro variables
-const float samplingtime = 1000.0;
+const float samplingtime = 1000.0; //milliseconds
+const float synctime = 100.0; //milliseconds
 boolean gyro_toggle = false;
 float pitch = 0;
 float yaw = 0;
@@ -81,7 +82,8 @@ void setup()
     ioInit();
 	
 	// 1 second timer init
-	timer1int();
+	timer1init();
+	timer3init();
 
     // Init LCD
     LCDInit();
@@ -161,6 +163,11 @@ ISR(TIMER1_OVF_vect) {
 TCNT1 = 0xFFFF - (samplingtime/0.016);
 gyro_toggle = true;
 }
+
+ISR(TIMER3_OVF_vect) {
+TCNT3=0xFFFF - (synctime/0.016);;
+//here we will send control data to the copter via xbee
+  }
 
 
 void getGyroData(){
@@ -395,7 +402,7 @@ void ioInit()
 
 }
 
-void timer1int(){
+void timer1init(){
 
 TIMSK1=0x01; // enable global and timer overflow interrupt
 TCCR1A = 0x00; // normal operation (mode0)
@@ -403,6 +410,15 @@ TCNT1=0x0000; // 16bit counter register
 TCCR1B = 0x04; // start timer/ set clock
 //TCNT1=0x0BDC; // set initial value for one second
 TCNT1 = 0xFFFF - (samplingtime/0.016);
+
+}
+
+void timer3init(){
+
+TIMSK3=0x01; // enabled global and timer overflow interrupt;
+TCCR3A = 0x00; // normal operation page 148 (mode0);
+TCCR3B = 0x04; // start timer/ set clock
+TCNT3 = 0xFFFF - (synctime/0.016);
 
 }
 
