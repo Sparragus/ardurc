@@ -36,7 +36,6 @@
 #define gyro_data_size 8
 
 #define gyroAddr 0x69 //Gyro address is either 0x68 or 0x69.
-#define gyrosleeppin 6
 
 #ifdef __DEBUG
 int states[] = {MAIN, SPEED, DEBUG};
@@ -52,7 +51,7 @@ int currentStatePos = 0;
 //gyro variables
 const float samplingtime = 1000.0; //milliseconds
 const float synctime = 100.0; //milliseconds
-boolean gyro_toggle = false;
+boolean gyro_toggle = true;
 float pitch = 0;
 float yaw = 0;
 float roll = 0;
@@ -72,18 +71,23 @@ int throttle_value = 0;
 
 void setup()
 {
-	 // Initializes gyro - must be run before serial
-	 initGyro();
-	
+
+	 Wire.begin();
+	  
 	//Initializes Serial comunication
 	intSerial();
+
+
+	 // Initializes gyro 
+	 initGyro();
+	
 	
     // Initializes IO pins
     ioInit();
 	
 	// 1 second timer init
-	timer1init();
-	timer3init();
+	//timer1init();
+	//timer3init();
 
     // Init LCD
     LCDInit();
@@ -138,6 +142,7 @@ void setup()
 
 void loop()
 {
+/**
     if (stateChanged())
     {
         controller(currentState, true);
@@ -146,41 +151,49 @@ void loop()
     {
         controller(currentState, false);
     }
-
-	if( gyro_toggle ){
+**/
+	//if( gyro_toggle ){
 		getGyroData();
-		gyro_toggle = false;
-	}
+		//gyro_toggle = false;
+	//}
 
-    throttle();
-    batteryStatus();
-    signalStatus();
+   // throttle();
+  //  batteryStatus();
+   // signalStatus();
 }
 
+/**
 //timer function, it runs every 1 second
 ISR(TIMER1_OVF_vect) {
+Serial.println("timer1");
 //TCNT1=0x0BDC;  // set initial value for one second
 TCNT1 = 0xFFFF - (samplingtime/0.016);
 gyro_toggle = true;
 }
 
+
 ISR(TIMER3_OVF_vect) {
+Serial.println("timer3");
 TCNT3=0xFFFF - (synctime/0.016);;
 //here we will send control data to the copter via xbee
   }
+ **/
+
 
 
 void getGyroData(){
+
+	Serial.println("getGyroData()");
 
 	Wire.beginTransmission(gyroAddr); 
 	Wire.send(0x1B); //Set to the first sensor register.
 	Wire.endTransmission();
 	
-	 delayMicroseconds(50); //Wait for the transmission to complete.
+	 delayMicroseconds(500); //Wait for the transmission to complete.
 
 	 Wire.requestFrom(gyroAddr, gyro_data_size); //Get the sensors output.
 	
-	 delayMicroseconds(50); //Wait for the bytes to arrive.  
+	 delayMicroseconds(500); //Wait for the bytes to arrive.  
 
 	 Serial.println("Waiting for sensors data... ");
 
@@ -325,8 +338,7 @@ void intSerial(){
 
 void initGyro(){
 
-  Wire.begin();
-
+Serial.print("Gyro started.");
   for(int i = 0; i < 3; i++){
     pitchvel[i] = 0;
     yawvel[i] = 0;
@@ -335,8 +347,6 @@ void initGyro(){
 
   //view ioInit() for pinMode definitions
   
-  /**
-  
   Wire.beginTransmission(gyroAddr);
   Wire.send(0x15); //Set which gyro register to update.
   Wire.send(0x00); //Set Sample Rate divider to 0.
@@ -344,8 +354,9 @@ void initGyro(){
   //Wire.send(0x01); //Set the interrupt pin to turn on when there is data available.
   //Wire.send(0x00); //Disable the interrupt pin.
   Wire.endTransmission();
-  
-  **/
+   delay(10);
+   
+   Serial.print("Gyro started.");
   
 }
 
@@ -394,11 +405,6 @@ void ioInit()
     pinMode(signal_led_blue, OUTPUT);
     pinMode(signal_rssi, INPUT);
 	
-	//set pinmode for gyro
-	pinMode(gyrosleeppin, INPUT);
-	digitalWrite(gyrosleeppin, LOW);
-	pinMode(gyrosleeppin, OUTPUT);
-	digitalWrite(gyrosleeppin, HIGH);
 
 }
 
