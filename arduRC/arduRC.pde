@@ -51,7 +51,7 @@ int currentStatePos = 0;
 //gyro variables
 const float samplingtime = 1000.0; //milliseconds
 const float synctime = 100.0; //milliseconds
-boolean gyro_toggle = true;
+boolean gyro_toggle = false;
 float pitch = 0;
 float yaw = 0;
 float roll = 0;
@@ -75,19 +75,17 @@ void setup()
 	 Wire.begin();
 	  
 	//Initializes Serial comunication
-	intSerial();
-
+	initSerial();
 
 	 // Initializes gyro 
 	 initGyro();
 	
-	
     // Initializes IO pins
     ioInit();
 	
-	// 1 second timer init
-	//timer1init();
-	//timer3init();
+	// Timer Inits
+	timer1init();
+	timer3init();
 
     // Init LCD
     LCDInit();
@@ -142,7 +140,7 @@ void setup()
 
 void loop()
 {
-/**
+
     if (stateChanged())
     {
         controller(currentState, true);
@@ -151,21 +149,21 @@ void loop()
     {
         controller(currentState, false);
     }
-**/
-	//if( gyro_toggle ){
-		getGyroData();
-		//gyro_toggle = false;
-	//}
 
-   // throttle();
-  //  batteryStatus();
-   // signalStatus();
+	if( gyro_toggle ){
+		getGyroData();
+		gyro_toggle = false;
+	}
+
+    throttle();
+	batteryStatus();
+	signalStatus();
 }
 
-/**
+
 //timer function, it runs every 1 second
 ISR(TIMER1_OVF_vect) {
-Serial.println("timer1");
+//Serial.println("timer1");
 //TCNT1=0x0BDC;  // set initial value for one second
 TCNT1 = 0xFFFF - (samplingtime/0.016);
 gyro_toggle = true;
@@ -173,17 +171,15 @@ gyro_toggle = true;
 
 
 ISR(TIMER3_OVF_vect) {
-Serial.println("timer3");
+//Serial.println("timer3");
 TCNT3=0xFFFF - (synctime/0.016);;
 //here we will send control data to the copter via xbee
   }
- **/
-
 
 
 void getGyroData(){
 
-	Serial.println("getGyroData()");
+	//Serial.println("getGyroData()");
 
 	Wire.beginTransmission(gyroAddr); 
 	Wire.send(0x1B); //Set to the first sensor register.
@@ -194,8 +190,8 @@ void getGyroData(){
 	 Wire.requestFrom(gyroAddr, gyro_data_size); //Get the sensors output.
 	
 	 delayMicroseconds(500); //Wait for the bytes to arrive.  
-
 	 Serial.println("Waiting for sensors data... ");
+
 
 	 while(Wire.available() < gyro_data_size);
 
@@ -326,7 +322,7 @@ bool stateChanged()
     return true;
 }
 
-void intSerial(){
+void initSerial(){
 
     Serial.begin(9600);
     Serial.println("Initialized Serial0!");
@@ -338,7 +334,7 @@ void intSerial(){
 
 void initGyro(){
 
-Serial.print("Gyro started.");
+//Serial.print("Gyro started.");
   for(int i = 0; i < 3; i++){
     pitchvel[i] = 0;
     yawvel[i] = 0;
@@ -356,7 +352,7 @@ Serial.print("Gyro started.");
   Wire.endTransmission();
    delay(10);
    
-   Serial.print("Gyro started.");
+   //Serial.print("Gyro finished starting.");
   
 }
 
