@@ -90,7 +90,10 @@ void setup()
     // Init LCD
     LCDInit();
     LCDClear(WHITE);
+	
+	LCDSplashScreen();
 
+	/**
 #ifdef __DEBUG
     //char someString[] = "another string!";
     //printString(someString, 10, 10);
@@ -136,11 +139,14 @@ void setup()
     //Serial.println("MVC test: Finished!");
 
 #endif
+
+**/
+
 }
 
 void loop()
 {
-
+/**
     if (stateChanged())
     {
         controller(currentState, true);
@@ -158,7 +164,75 @@ void loop()
     throttle();
 	batteryStatus();
 	signalStatus();
+	
+**/
 }
+
+
+void LCDSplashScreen(){
+
+        //int xSize = 128+4;
+        //int ySize = 128;
+                
+                int xSize = ROW_LENGTH;
+                int ySize = COL_HEIGHT-4;
+        
+        
+// void LCDSetLine(int x0, int y0, int x1, int y1, int color);
+        
+        
+//        LCDSetRect(32,32,10,10,FILL,BLUE); -- RC
+
+        LCDSetRect( (xSize/4) , (ySize/2), ((3*xSize)/4) - (xSize/4) , (((3*ySize)/4) - (ySize/4))/2, FILL, BLUE );
+        
+//        LCDSetRect( x , y ,  width ,  height , FILL, BLUE ); -- ANTENA
+
+        LCDSetRect(  ((3*xSize)/4) - 4   , 32 ,  4 ,  32 , FILL, BLACK );
+
+        // Draw Antenna Signals
+        LCDSplashScreen_Antenna_Signal();
+
+        
+// LCDPutStr(char *pString, int x, int y, int Size, int fColor, int bColor) -- TEXT
+
+        LCDPutStr(" ArduRC",  (xSize/4)+1 ,  (ySize/4)+((3*ySize)/8) , LARGE, WHITE, BLUE);
+        
+        LCDSplashScreen_Flash_Init(8, 500, 250);
+        
+}
+
+void LCDSplashScreen_Flash_Init(int flash_times, int delay_text, int delay_blank)
+{
+        for(int i = 0; i < flash_times; i++){
+        LCDPutStr("Initializing...",  7 ,  110 , LARGE, BLACK, WHITE);
+        delay(delay_text);
+        LCDPutStr("               ",  7 ,  110 , LARGE, BLACK, WHITE);
+        delay(delay_blank);
+        }
+}
+
+void LCDSplashScreen_Antenna_Signal()
+{
+    // Give width to line
+	
+		int delay_time = 150;
+		
+		for(int i = 0; i < 5; i++)
+		{
+			LCDSetLine( ((3*ROW_LENGTH)/4) - 4 + i , 30, ROW_LENGTH/2 + 12*0 + i, 18, RED);
+			delay(delay_time);
+			LCDSetLine( ((3*ROW_LENGTH)/4) - 4 + i , 30, ROW_LENGTH/2 + 12*1 + i, 18, RED);
+			delay(delay_time);
+			LCDSetLine( ((3*ROW_LENGTH)/4) - 4 + i , 30, ROW_LENGTH/2 + 12*2 + i, 18, RED);
+			delay(delay_time);
+			LCDSetLine( ((3*ROW_LENGTH)/4) - 4 + i , 30, ROW_LENGTH/2 + 12*3 + i, 18, RED);
+			delay(delay_time);
+			LCDSetLine( ((3*ROW_LENGTH)/4) - 4 + i , 30, ROW_LENGTH/2 + 12*4 + i, 18, RED);
+			delay(delay_time);
+		}
+    
+}
+
 
 
 //timer function, it runs every 1 second
