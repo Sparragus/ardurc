@@ -147,6 +147,7 @@ void loop()
 
 	if( gyro_toggle ){
 		getGyroData();
+		gyro_toggle = false;
 	}
 
     throttle();
@@ -156,8 +157,9 @@ void loop()
 
 //timer function, it runs every 1 second
 ISR(TIMER1_OVF_vect) {
-TCNT1=0x0BDC;  // set initial value
-gyro_toggle = !gyro_toggle;
+//TCNT1=0x0BDC;  // set initial value for one second
+TCNT1 = 0xFFFF - (samplingtime/0.016);
+gyro_toggle = true;
 }
 
 
@@ -399,7 +401,8 @@ TIMSK1=0x01; // enable global and timer overflow interrupt
 TCCR1A = 0x00; // normal operation (mode0)
 TCNT1=0x0000; // 16bit counter register
 TCCR1B = 0x04; // start timer/ set clock
-TCNT1=0x0BDC; // set initial value
+//TCNT1=0x0BDC; // set initial value for one second
+TCNT1 = 0xFFFF - (samplingtime/0.016);
 
 }
 
