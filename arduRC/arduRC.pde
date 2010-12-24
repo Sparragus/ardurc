@@ -5,6 +5,8 @@
 #include "arduRC_states.h"
 #include "arduRC_controller.h"
 
+#include <Math.h>
+
 #include <Wire.h>
 
 #define __DEBUG 
@@ -216,9 +218,9 @@ void getGyroData(){
     roll = pitch + samplingtime * (rollvel[0] + rollvel[1] + rollvel[2] + rollvel[3]) / 6.0;
 
     //Limit to 0-359 degrees.
-    pitch = pitch % 360.0;
-    yaw = yaw % 360.0;
-    roll = roll % 360.0;
+    pitch = fmod(pitch, 360.0);
+    yaw = fmod(yaw, 360.0);
+    roll = fmod(roll, 360.0);
 
     Serial.println(pitch, DEC);
     Serial.println(yaw, DEC);
