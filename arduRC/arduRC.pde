@@ -5,10 +5,12 @@
 #include "arduRC_states.h"
 #include "arduRC_controller.h"
 
+#include <Wire.h>
+
 #define __DEBUG 
 
-#define BUTTON_LEFT 21
-#define BUTTON_RIGHT 20
+#define BUTTON_LEFT 2
+#define BUTTON_RIGHT 3
 
 #define LEFT 0
 #define RIGHT 1
@@ -26,6 +28,14 @@
 #define batt_led_green 38
 #define batt_led_blue 36
 
+#define SDA 20
+#define SDL 21
+
+#define gyro_data_size 8
+
+#define gyroAddr 0x69 //Gyro address is either 0x68 or 0x69.
+#define gyrosleeppin 6
+
 #ifdef __DEBUG
 int states[] = {MAIN, SPEED, DEBUG};
 #else
@@ -37,6 +47,19 @@ int currentState = states[0];
 int oldState = currentState; 
 int currentStatePos = 0;
 
+//gyro variables
+const float samplingtime = 1000.0;
+boolean gyro_toggle = false;
+float pitch = 0;
+float yaw = 0;
+float roll = 0;
+int temperature = 0;
+
+//Previous values for Runge-Kutta integration algorithm.
+float pitchvel[4];
+float yawvel[4];
+float rollvel[4];
+
 //status variables
 int batt_status = 0;
 int signal_status = 0;
@@ -46,14 +69,17 @@ int throttle_value = 0;
 
 void setup()
 {
-    Serial.begin(9600);
-    Serial.println("Initialized Serial0!");
-
-    Serial1.begin(115200);
-    Serial1.println("Initialized Serial1!");
-
+	 // Initializes gyro - must be run before serial
+	 initGyro();
+	
+	//Initializes Serial comunication
+	intSerial();
+	
     // Initializes IO pins
     ioInit();
+	
+	// 1 second timer init
+	timer1int();
 
     // Init LCD
     LCDInit();
@@ -103,7 +129,6 @@ void setup()
     //controller(currentState);
     //Serial.println("MVC test: Finished!");
 
-
 #endif
 }
 
@@ -118,10 +143,93 @@ void loop()
         controller(currentState, false);
     }
 
+	if( gyro_toggle ){
+		getGyroData();
+	}
 
     throttle();
     batteryStatus();
     signalStatus();
+}
+
+//timer function, it runs every 1 second
+ISR(TIMER1_OVF_vect) {
+TCNT1=0x0BDC;  // set initial value
+gyro_toggle = !gyro_toggle;
+}
+
+
+void getGyroData(){
+
+	Wire.beginTransmission(gyroAddr); 
+	Wire.send(0x1B); //Set to the first sensor register.
+	Wire.endTransmission();
+	
+	 delayMicroseconds(50); //Wait for the transmission to complete.
+
+	 Wire.requestFrom(gyroAddr, gyro_data_size); //Get the sensors output.
+	
+	 delayMicroseconds(50); //Wait for the bytes to arrive.  
+
+	 Serial.println("Waiting for sensors data... ");
+
+	 while(Wire.available() < gyro_data_size);
+
+	 if(8 <= Wire.available()){
+	 
+    //Get the temperature reading.
+    temperature = Wire.receive();
+    temperature = temperature << 8;
+    temperature |= Wire.receive(); 
+	
+    //Convert this reading to degrees Celsius.
+    temperature = 35.0 + ((temperature + 13200) / 280.0);
+	
+	//Remove one of the old readings for each axis.
+    for(int i = 1; i < 4; i++){
+      pitchvel[i-1] = pitchvel[i];
+      yawvel[i-1] = yawvel[i];
+      rollvel[i-1] = rollvel[i];
+    }
+	
+	//Get the angular velocity of the x axis.
+    int x = Wire.receive();
+    x = x << 8;
+    x |= Wire.receive();
+    pitchvel[3] = (float) x / 14.375;
+
+    //Get the angular velocity of the y axis.
+    int y = Wire.receive();
+    y = y << 8;
+    y |= Wire.receive();
+    rollvel[3] = (float) y / 14.375;
+
+    //Get the angular velocity of the z axis.
+    int z = Wire.receive();
+    z = z << 8;
+    z |= Wire.receive();
+    yawvel[3] = (float) z / 14.375;
+
+    //Convert x, y, z to pitch, yaw and roll.
+    pitch = pitch + samplingtime * (pitchvel[0] + pitchvel[1] + pitchvel[2] + pitchvel[3]) / 6.0;
+    yaw = yaw + samplingtime * (yawvel[0] + yawvel[1] + yawvel[2] + yawvel[3]) / 6.0;
+    roll = pitch + samplingtime * (rollvel[0] + rollvel[1] + rollvel[2] + rollvel[3]) / 6.0;
+
+    //Limit to 0-359 degrees.
+    pitch = pitch % 360.0;
+    yaw = yaw % 360.0;
+    roll = roll % 360.0;
+
+    Serial.println(pitch, DEC);
+    Serial.println(yaw, DEC);
+    Serial.println(roll, DEC);
+	
+  }
+  
+  else{ 
+	Serial.println("No info was found.");
+  }
+
 }
 
 void batteryStatus()
@@ -194,6 +302,42 @@ bool stateChanged()
     return true;
 }
 
+void intSerial(){
+
+    Serial.begin(9600);
+    Serial.println("Initialized Serial0!");
+
+    Serial1.begin(115200);
+    Serial1.println("Initialized Serial1!");
+
+}
+
+void initGyro(){
+
+  Wire.begin();
+
+  for(int i = 0; i < 3; i++){
+    pitchvel[i] = 0;
+    yawvel[i] = 0;
+    rollvel[i] = 0;
+  }
+
+  //view ioInit() for pinMode definitions
+  
+  /**
+  
+  Wire.beginTransmission(gyroAddr);
+  Wire.send(0x15); //Set which gyro register to update.
+  Wire.send(0x00); //Set Sample Rate divider to 0.
+  //Wire.send(0x18); //Set Low Pass Filter Bandwidth to 256 Hz and Sampling rate to 8 kHz.
+  //Wire.send(0x01); //Set the interrupt pin to turn on when there is data available.
+  //Wire.send(0x00); //Disable the interrupt pin.
+  Wire.endTransmission();
+  
+  **/
+  
+}
+
 void ioInit()
 {
 #ifdef _USE_ARDUINO_FOR_NOKIA_
@@ -206,6 +350,15 @@ void ioInit()
 
     //No need to define pins for xBee. It uses RX/TX
 
+	
+	//Disable internal pullups that Wire actividated for SDA and SDL
+	pinMode(SDA,INPUT);
+	digitalWrite(SDA,LOW);
+	pinMode(SDA,OUTPUT);
+	pinMode(SDL,INPUT);
+	digitalWrite(SDL,LOW);
+	pinMode(SDL,OUTPUT);
+	
     //Ports for ISR for Buttons
     //Pins 2-3, 18-21
     pinMode(BUTTON_LEFT, INPUT);
@@ -229,6 +382,22 @@ void ioInit()
     pinMode(signal_led_green, OUTPUT);
     pinMode(signal_led_blue, OUTPUT);
     pinMode(signal_rssi, INPUT);
+	
+	//set pinmode for gyro
+	pinMode(gyrosleeppin, INPUT);
+	digitalWrite(gyrosleeppin, LOW);
+	pinMode(gyrosleeppin, OUTPUT);
+	digitalWrite(gyrosleeppin, HIGH);
+
+}
+
+void timer1int(){
+
+TIMSK1=0x01; // enable global and timer overflow interrupt
+TCCR1A = 0x00; // normal operation (mode0)
+TCNT1=0x0000; // 16bit counter register
+TCCR1B = 0x04; // start timer/ set clock
+TCNT1=0x0BDC; // set initial value
 
 }
 
