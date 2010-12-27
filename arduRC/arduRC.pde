@@ -680,3 +680,4 @@ void buttonPicture()
 		armed_motors ? Serial.println("TRUE") : Serial.println("FALSE");
 
 }
+
