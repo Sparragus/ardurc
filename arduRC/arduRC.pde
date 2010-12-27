@@ -12,8 +12,8 @@
 
 #define __DEBUG 
 
-#define BUTTON_LEFT 2
-#define BUTTON_RIGHT 3
+#define BUTTON_LEFT 3
+#define BUTTON_RIGHT 2
 #define BUTTON_CONTROL 18
 #define BUTTON_PICTURE 19
 
@@ -54,8 +54,8 @@ int oldState = 1;
 int currentStatePos = 0;
 
 //gyro variables
-const float samplingtime = 1000.0; //milliseconds
-const float synctime = 900.0; //milliseconds
+const float samplingtime = 1.0; //milliseconds
+const float synctime = 500.0; //milliseconds
 boolean gyro_toggle = false;
 float pitch = 0;
 float yaw = 0;
@@ -79,7 +79,7 @@ boolean armed_motors = false;
 
 boolean sendNavInfo = false;
 
-char navCommandNotArmed[27];
+char navCommand[32];
 
 void setup()
 {
@@ -167,12 +167,12 @@ void loop()
 		controller(currentState, false);
 	}
 
-	/*
+	
 	if( gyro_toggle ){
 		getGyroData();
 		gyro_toggle = false;
 	}
-	*/
+
 
 	throttle();
 	batteryStatus();
@@ -260,9 +260,40 @@ ISR(TIMER3_OVF_vect) {
 	//here we will send control data to the copter via xbee
 	
 		
-	//if(sendNavInfo)
-	if(false)
+    if(sendNavInfo)
+	//if(false)
 	{
+        int roll_mapped = 0;
+        int pitch_mapped = (int) pitch;
+        
+        
+        if(pitch_mapped > 20)
+        {
+            pitch_mapped = 20;
+        }
+
+        else if (pitch_mapped < -20)
+        {
+            pitch_mapped = -20;
+        }
+
+        int yaw_mapped = 0;
+
+        roll_mapped = map(roll_mapped, -20, 20, 1106, 1893);
+        pitch_mapped = map(pitch_mapped, -20, 20, 1111, 1899);
+        yaw_mapped = map(yaw_mapped, -20, 20, 1109, 1891);
+
+
+        //If not armed
+		if(!armed_motors)
+		{	
+
+            sprintf(navCommand, "V%d;%d;%d;2003;994;1200;%d", roll_mapped, pitch_mapped, yaw_mapped, throttle_value_mapped);
+		}
+		else
+		{
+            sprintf(navCommand, "V%d;%d;%d;2003;994;1400;%d", roll_mapped, pitch_mapped, yaw_mapped, throttle_value_mapped);
+		}
 
 	}
 	else
@@ -273,18 +304,18 @@ ISR(TIMER3_OVF_vect) {
 		//If not armed
 		if(!armed_motors)
 		{	
-			sprintf(navCommandNotArmed, "V1545;1500;1498;2003;994;1200;%d", throttle_value_mapped);
+			sprintf(navCommand, "V1545;1500;1498;2003;994;1200;%d", throttle_value_mapped);
 		}
 		else
 		{
-			sprintf(navCommandNotArmed, "V1545;1500;1498;2003;994;1400;%d", throttle_value_mapped);
+			sprintf(navCommand, "V1545;1500;1498;2003;994;1400;%d", throttle_value_mapped);
 		}
 		
-			// Serial.print("NavCommand: ");
-			// Serial.println(navCommandNotArmed);
 			
-            Serial3.println(navCommandNotArmed);
 	}
+            Serial.print("NavCommand: ");
+            Serial.println(navCommand);
+        Serial3.println(navCommand);
 }
 
 void getGyroData(){
@@ -324,7 +355,7 @@ void getGyroData(){
 		int x = Wire.receive();
 		x = x << 8;
 		x |= Wire.receive();
-		pitchvel[3] = (float) x / 14.375;
+		pitchvel[3] = (float) x / 14.375 - 28;
 
 		//Get the angular velocity of the y axis.
 		int y = Wire.receive();
@@ -487,12 +518,12 @@ void ioInit()
 	//Enable internal pull-up resistor for BUTTON_RIGHT
 	pinMode(BUTTON_RIGHT,INPUT);
 	digitalWrite(BUTTON_RIGHT,HIGH);
-	attachInterrupt(0, buttonLeft, FALLING);
+	attachInterrupt(1, buttonRight, FALLING);
 	
 	//Enable internal pull-up resistor for BUTTON_LEFT
-	pinMode(BUTTON_RIGHT,INPUT);
-	digitalWrite(BUTTON_RIGHT,HIGH);
-	attachInterrupt(1, buttonRight, FALLING);
+	pinMode(BUTTON_LEFT,INPUT);
+	digitalWrite(BUTTON_LEFT,HIGH);
+	attachInterrupt(0, buttonLeft, FALLING);
 
 	//Enable internal pull-up resistor for BUTTON_CONTROL
 	pinMode(BUTTON_CONTROL,INPUT);
@@ -594,14 +625,14 @@ void buttonRight()
 
 	Serial.println("button_right");
 	
-	static unsigned long last_millis = 0;
+	static unsigned long last_millis1 = 0;
 	unsigned long m = millis();
-	if (m - last_millis < 200)
+	if (m - last_millis1 < 200)
 	{
 
 	}
 	else{
-		last_millis = m;
+		last_millis1 = m;
 		stateManager(RIGHT);
 	}
 }
@@ -611,20 +642,18 @@ void buttonControl()
 
 	Serial.println("button_Nav");
 
-	//static unsigned long last_millis = 0;
-	//unsigned long m = millis();
-	//if (m - last_millis < 200)
-	//{
+    static unsigned long last_millis2 = 0;
+    unsigned long m = millis();
+    if (m - last_millis2 < 200)
+    {
 
-	//}
-	//else{
-		//last_millis = m;
-		
-		
-		// Toggle sendNavInfo control var
+    }
+    else{
+        last_millis2 = m;
+        //Toggle sendNavInfo control var
 		sendNavInfo = !sendNavInfo;
 		
-		//}
+        }
 		Serial.print ("Control: ");
         sendNavInfo ? Serial.println("TRUE") : Serial.println("FALSE");
 }
@@ -634,18 +663,18 @@ void buttonPicture()
 
 	Serial.println("button_arm");
 
-	//static unsigned long last_millis = 0;
-	//unsigned long m = millis();
-	//if (m - last_millis < 200)
-	//{
+    static unsigned long last_millis3 = 0;
+    unsigned long m = millis();
+    if (m - last_millis3 < 200)
+    {
 
-	//}
-	//else{
-		//last_millis = m;
+    }
+    else{
+        last_millis3 = m;
 		
 		
 		armed_motors = !armed_motors;
-		//}
+        }
 		
 		Serial.print ("Motors: ");
 		armed_motors ? Serial.println("TRUE") : Serial.println("FALSE");
