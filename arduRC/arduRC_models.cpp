@@ -18,6 +18,8 @@ char information[128];
 char prevScreen[128];
 char nextScreen[128];
 
+char serialDataVar[128];
+
 char* getSerialData(char endChar)
 {
     i = 0;
@@ -36,15 +38,17 @@ char* getSerialData(char endChar)
         buff[i] = data_byte;
         i++;
     }
-    strncpy(information, buff, i);
-    //strncat(information, 0x00, 1);
+    strncpy(serialDataVar, buff, i);
+    //strncat(serialDataVar, 0x00, 1);
 
-    Serial.print(information);
-    return information;
+    Serial.print(serialDataVar);
+    return serialDataVar;
 }
 
 void mainModel(bool updated)
 {
+	//Updated means to update whole screen. Therefore: updated = TRUE >> update whole screen
+	
     if (!updated)
     {
         data = getSerialData(END_CHAR);

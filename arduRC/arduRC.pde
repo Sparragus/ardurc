@@ -17,18 +17,18 @@
 #define LEFT 0
 #define RIGHT 1
 
-#define throttle_pot A0
+#define throttle_pot_in A0
 #define throttle_led 7
 
 #define signal_rssi A1
-#define signal_led_red 41
-#define signal_led_green 39
-#define signal_led_blue 37
+#define signal_led_red 41  //
+#define signal_led_green 39 //
+#define signal_led_blue 37 //
 
 #define batt_status_in A2
-#define batt_led_red 40
-#define batt_led_green 38
-#define batt_led_blue 36
+#define batt_led_red 40 //
+#define batt_led_green 38 //
+#define batt_led_blue 36 //
 
 #define SDA 20
 #define SDL 21
@@ -46,6 +46,7 @@ int states[] = {MAIN, SPEED, ALTITUDE, GPS, TEMP, DEBUG};
 int statesLen = sizeof(states)/sizeof(int);
 int currentState = states[0];
 int oldState = currentState; 
+//int oldState = 1; 
 int currentStatePos = 0;
 
 //gyro variables
@@ -91,8 +92,9 @@ void setup()
 	LCDClear(WHITE);
 	
 	LCDSplashScreen();
+	
 
-/**
+	/**
 #ifdef __DEBUG
 	//char someString[] = "another string!";
 	//printString(someString, 10, 10);
@@ -144,7 +146,7 @@ void setup()
 
 void loop()
 {
-	/**
+
 	if (stateChanged())
 	{
 		controller(currentState, true);
@@ -154,16 +156,21 @@ void loop()
 		controller(currentState, false);
 	}
 
+	/*
 	if( gyro_toggle ){
 		getGyroData();
 		gyro_toggle = false;
 	}
+	*/
 
-	throttle();
+	//throttle();
 	batteryStatus();
 	signalStatus();
 	
-	**/
+	throttle_status = map(analogRead(throttle_pot_in), 0, 1023, 255, 0); 
+	analogWrite(throttle_led,throttle_status);
+	//Serial.println(throttle_status);
+	
 }
 
 
@@ -315,9 +322,11 @@ void getGyroData(){
 
 void batteryStatus()
 {
-
+	
 	batt_status = map(analogRead(batt_status_in),0,1023,0,3);
+	
 
+	
 	if(batt_status == 3){
 		digitalWrite(batt_led_red, LOW);
 		digitalWrite(batt_led_green, HIGH);
@@ -329,12 +338,13 @@ void batteryStatus()
 		digitalWrite(batt_led_green, LOW);
 		digitalWrite(batt_led_blue, HIGH);
 	} 
-	// if  (batt_status == 1){
-	else{
+	else if  (batt_status <= 1 ){
+		//else{
 		digitalWrite(batt_led_red, HIGH);
 		digitalWrite(batt_led_green, LOW);
 		digitalWrite(batt_led_blue, LOW);
 	} 
+
 }
 
 void signalStatus()
@@ -351,16 +361,17 @@ void signalStatus()
 		digitalWrite(signal_led_green, LOW);
 		digitalWrite(signal_led_blue, HIGH);
 	}
-	//if(rssiDur >= 39){ //low
-	else{
+	if(signal_status >= 39){ //low
+		//else{
 		digitalWrite(signal_led_red, HIGH);
 		digitalWrite(signal_led_green, LOW);
 		digitalWrite(signal_led_blue, LOW);
 	}
 }
 
+/*
 void throttle(){
-	throttle_value = analogRead(throttle_pot);
+	throttle_value = analogRead(throttle_pot_in);
 	throttle_led_func(throttle_value);
 }
 
@@ -368,6 +379,7 @@ void throttle_led_func(int throttle_value){
 	throttle_status = map(throttle_value, 0, 1023, 255, 0); 
 	analogWrite(throttle_led,throttle_status);
 }
+*/
 
 bool stateChanged()
 {
@@ -432,14 +444,14 @@ void ioInit()
 	//Pins 2-3, 18-21
 	pinMode(BUTTON_LEFT, INPUT);
 	digitalWrite(BUTTON_LEFT, HIGH);
-	attachInterrupt(2, buttonLeft, FALLING);
+	attachInterrupt(0, buttonLeft, FALLING);
 
 	pinMode(BUTTON_RIGHT, INPUT);
 	digitalWrite(BUTTON_RIGHT, HIGH);
-	attachInterrupt(3, buttonRight, FALLING);
+	attachInterrupt(1, buttonRight, FALLING);
 
 	//Set pinMode for throttle potenciometer and led indicator
-	pinMode(throttle_pot, INPUT);
+	pinMode(throttle_pot_in, INPUT);
 	pinMode(throttle_led, OUTPUT);
 	//Set pinMode for battery indicators
 	pinMode(batt_led_red, OUTPUT);
@@ -508,6 +520,9 @@ void stateManager(int dir)
 
 void buttonLeft()
 {
+
+	Serial.println("button_left");
+
 	static unsigned long last_millis = 0;
 	unsigned long m = millis();
 	if (m - last_millis < 200)
@@ -522,14 +537,17 @@ void buttonLeft()
 
 void buttonRight()
 {
-	static unsigned long last_millis = 0;
-	unsigned long m = millis();
-	if (m - last_millis < 200)
-	{
 
-	}
-	else{
-		last_millis = m;
+	Serial.println("button_right");
+	
+	//static unsigned long last_millis = 0;
+	//unsigned long m = millis();
+	//if (m - last_millis < 200)
+	//{
+
+	//}
+	//else{
+	//	last_millis = m;
 		stateManager(RIGHT);
-	}
+	//}
 }
