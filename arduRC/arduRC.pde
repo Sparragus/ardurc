@@ -41,20 +41,21 @@
 #define gyroAddr 0x69 //Gyro address is either 0x68 or 0x69.
 
 #ifdef __DEBUG
-int states[] = {MAIN, SPEED, DEBUG};
+//int states[] = {MAIN, SPEED, TEMP, ALTITUDE};
+int states[] = {MAIN, TEMP, ALTITUDE};
 #else
 int states[] = {MAIN, SPEED, ALTITUDE, GPS, TEMP, DEBUG};
 #endif
 
 int statesLen = sizeof(states)/sizeof(int);
 int currentState = states[0];
-int oldState = currentState; 
-//int oldState = 1; 
+//int oldState = currentState; 
+int oldState = 1; 
 int currentStatePos = 0;
 
 //gyro variables
 const float samplingtime = 1000.0; //milliseconds
-const float synctime = 100.0; //milliseconds
+const float synctime = 900.0; //milliseconds
 boolean gyro_toggle = false;
 float pitch = 0;
 float yaw = 0;
@@ -101,7 +102,7 @@ void setup()
 	LCDInit();
 	LCDClear(WHITE);
 	
-	//LCDSplashScreen();
+    LCDSplashScreen();
 	
 
 	/**
@@ -282,7 +283,7 @@ ISR(TIMER3_OVF_vect) {
 			// Serial.print("NavCommand: ");
 			// Serial.println(navCommandNotArmed);
 			
-			// Serial3.println(navCommandNotArmed);
+            Serial3.println(navCommandNotArmed);
 	}
 }
 
@@ -387,13 +388,15 @@ void batteryStatus()
 void signalStatus()
 {
 	signal_status = pulseIn(signal_rssi, LOW, 200);
+    //Serial.print("Signal: ");
+    //Serial.println(signal_status);
 
-	if(signal_status <= 35){ //high
+	if(signal_status <= 33){ //high
 		digitalWrite(signal_led_red, LOW);
 		digitalWrite(signal_led_green, HIGH);
 		digitalWrite(signal_led_blue, LOW);
 	}
-	else if(signal_status > 35 && signal_status < 39){ //medium
+	else if(signal_status > 33 && signal_status < 39){ //medium
 		digitalWrite(signal_led_red, LOW);
 		digitalWrite(signal_led_green, LOW);
 		digitalWrite(signal_led_blue, HIGH);
@@ -606,7 +609,7 @@ void buttonRight()
 void buttonControl()
 {
 
-	Serial.println("button_control");
+	Serial.println("button_Nav");
 
 	//static unsigned long last_millis = 0;
 	//unsigned long m = millis();
@@ -623,26 +626,26 @@ void buttonControl()
 		
 		//}
 		Serial.print ("Control: ");
-		//sendNavInfo ? Serial.println("TRUE") : Serial.println("FALSE");
+        sendNavInfo ? Serial.println("TRUE") : Serial.println("FALSE");
 }
 
 void buttonPicture()
 {
 
-	Serial.println("button_picture");
+	Serial.println("button_arm");
 
-	static unsigned long last_millis = 0;
-	unsigned long m = millis();
-	if (m - last_millis < 200)
-	{
+	//static unsigned long last_millis = 0;
+	//unsigned long m = millis();
+	//if (m - last_millis < 200)
+	//{
 
-	}
-	else{
-		last_millis = m;
+	//}
+	//else{
+		//last_millis = m;
 		
 		
 		armed_motors = !armed_motors;
-		}
+		//}
 		
 		Serial.print ("Motors: ");
 		armed_motors ? Serial.println("TRUE") : Serial.println("FALSE");

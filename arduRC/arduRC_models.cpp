@@ -10,6 +10,7 @@ const char END_CHAR = ';';
 char buff[128];
 char data_byte;
 int i;
+int j;
 char *data;
 
 
@@ -26,7 +27,7 @@ char* getSerialData(char endChar)
     {
         data_byte = Serial3.read();
 
-        if(data_byte==END_CHAR)
+        if(data_byte==endChar)
         {
             buff[i] = 0x00;
             i++;
@@ -49,15 +50,15 @@ void mainModel(bool updated)
 	
     if (!updated)
     {
-        data = getSerialData(END_CHAR);
+        //data = getSerialData(END_CHAR);
         mainView(data);
     }
     else
     {
         strcpy(screenTitle, "MAIN SCREEN");
         strcpy(information, "ArduRC Team!");
-        strcpy(prevScreen, "debug");
-        strcpy(nextScreen, "speed");
+        strcpy(prevScreen, "altitude");
+        strcpy(nextScreen, "temp");
 
         mainViewUpdate(screenTitle, information, prevScreen, nextScreen);
     }
@@ -65,52 +66,89 @@ void mainModel(bool updated)
 
 void speedModel(bool updated)
 {
-    // Request Speed information
-    Serial3.flush();
-    Serial3.print('T');
-	delay(200);
+    //// Request Speed information
+    //Serial3.flush();
+    //Serial3.print('T');
+	//delay(200);
 
-    if (!updated)
-    {
-        data = getSerialData(0x10);
-        speedView(data);
+    //if (!updated)
+    //{
+        //data = getSerialData(',');
+        //speedView(data);
 		
 			
-		Serial.print("T DATA: ");
-		Serial.println(data);
-    }
-    else
-    {
-        strcpy(screenTitle, "SPEED SCREEN");
-        strcpy(information, "ArduRC Team!");
-        strcpy(prevScreen, "main");
-        strcpy(nextScreen, "debug");
-        speedViewUpdate(screenTitle, information, prevScreen, nextScreen);
+		//Serial.print("T DATA: ");
+		//Serial.println(data);
+    //}
+    //else
+    //{
+        //strcpy(screenTitle, "SPEED SCREEN");
+        //strcpy(information, "ArduRC Team!");
+        //strcpy(prevScreen, "main");
+        //strcpy(nextScreen, "temp");
+        //speedViewUpdate(screenTitle, information, prevScreen, nextScreen);
 
+    //}
+}
+
+char* altitudeParse(char *dataX)
+{
+    i = 0;
+    j = 0;
+
+    while(dataX[i] != ',' and i < 128)
+    {
+        i++;
     }
+
+    i++;
+    
+    while(dataX[i] != ',' and i < 128 and j < 128)
+    {
+        buff[j] = dataX[i];
+        
+        i++;
+        j++;
+    }
+    
+    strncpy(information, buff, j);
+    strcat(information, "cm");
+    //strncat(information, 0x00, 1);
+
+    //Serial.print(information);
+    return information;
+
 }
 
 void altitudeModel(bool updated)
 {
-    // Request Speed information
+    // Request Altitude information
     Serial3.flush();
     Serial3.print('T');
+    delay(200);
 
     if (!updated)
     {
-        data = getSerialData(0x10);
-        altitudeView(data);
+        data = getSerialData('\n');
+        data = altitudeParse(data);
+        tempView(data);
+		
+		Serial.print("Altitude DATA: ");
+		Serial.print(data);
+        Serial.println(" cm");
     }
     else
     {
         strcpy(screenTitle, "ALTITUDE");
         strcpy(information, "42 meters");
-        strcpy(prevScreen, "speed");
-        strcpy(nextScreen, "gps");
+        strcpy(prevScreen, "temp");
+        strcpy(nextScreen, "main");
         altitudeViewUpdate(screenTitle, information, prevScreen, nextScreen);
 
     }
 }
+
+
 
 void gpsModel(bool updated)
 {
@@ -136,24 +174,27 @@ void gpsModel(bool updated)
 
 void tempModel(bool updated)
 {
-    // Request Speed information
-    Serial1.flush();
-    Serial1.print('T');
+    // Request Temp information
+    Serial3.flush();
+    Serial3.print('T');
+    delay(200);
 
     if (!updated)
     {
-        data = getSerialData(END_CHAR);
+        data = getSerialData(',');
+        strcat(data, " F");
         tempView(data);
 		
 		Serial.print("T DATA: ");
-		Serial.println(data);
+		Serial.print(data);
+        Serial.println(" F");
     }
     else
     {
         strcpy(screenTitle, "TEMPERATURE");
         strcpy(information, "42 C");
-        strcpy(prevScreen, "gps");
-        strcpy(nextScreen, "debug");
+        strcpy(prevScreen, "main");
+        strcpy(nextScreen, "altitude");
         tempViewUpdate(screenTitle, information, prevScreen, nextScreen);
     }
 }
