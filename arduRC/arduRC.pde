@@ -255,7 +255,7 @@ ISR(TIMER1_OVF_vect) {
 
 ISR(TIMER3_OVF_vect) {
 	//Serial.println("timer3");
-	TCNT3=0xFFFF - (synctime/0.016);;
+	TCNT3=0xFFFF - (synctime/0.016);
 	//here we will send control data to the copter via xbee
 	
 		
@@ -267,21 +267,22 @@ ISR(TIMER3_OVF_vect) {
 	else
 	{
 		//Send default values:
-		// Pitch;Yaw;Roll;Throttle;Aux1HIGH;Aux2LOW;Aux31200
+		// Roll, Pitch;Yaw;Aux1HIGH;Aux3_1200;Aux2LOW;Throttle
 		
 		//If not armed
 		if(!armed_motors)
 		{	
-			sprintf(navCommandNotArmed, "V1500;1498;1545;%d;2003;994;1200", throttle_value_mapped);
+			sprintf(navCommandNotArmed, "V1545;1500;1498;2003;994;1200;%d", throttle_value_mapped);
 		}
 		else
 		{
-			sprintf(navCommandNotArmed, "V1500;1498;1545;%d;2003;994;1400", throttle_value_mapped);
+			sprintf(navCommandNotArmed, "V1545;1500;1498;2003;994;1400;%d", throttle_value_mapped);
 		}
 		
-			Serial.print("NavCommand: ");
-			Serial.println(navCommandNotArmed);
-			Serial3.println(navCommandNotArmed);
+			// Serial.print("NavCommand: ");
+			// Serial.println(navCommandNotArmed);
+			
+			// Serial3.println(navCommandNotArmed);
 	}
 }
 
@@ -403,7 +404,7 @@ void signalStatus()
 		digitalWrite(signal_led_green, LOW);
 		digitalWrite(signal_led_blue, LOW);
 	}
-}
+} 
 
 
 void throttle(){
@@ -607,22 +608,22 @@ void buttonControl()
 
 	Serial.println("button_control");
 
-	static unsigned long last_millis = 0;
-	unsigned long m = millis();
-	if (m - last_millis < 200)
-	{
+	//static unsigned long last_millis = 0;
+	//unsigned long m = millis();
+	//if (m - last_millis < 200)
+	//{
 
-	}
-	else{
-		last_millis = m;
+	//}
+	//else{
+		//last_millis = m;
 		
 		
 		// Toggle sendNavInfo control var
 		sendNavInfo = !sendNavInfo;
 		
-		}
+		//}
 		Serial.print ("Control: ");
-		sendNavInfo ? Serial.println("TRUE") : Serial.println("FALSE");
+		//sendNavInfo ? Serial.println("TRUE") : Serial.println("FALSE");
 }
 
 void buttonPicture()

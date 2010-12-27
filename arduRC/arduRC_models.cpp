@@ -10,8 +10,8 @@ const char END_CHAR = ';';
 char buff[128];
 char data_byte;
 int i;
-
 char *data;
+
 
 char screenTitle[128];
 char information[128];
@@ -22,9 +22,9 @@ char* getSerialData(char endChar)
 {
     i = 0;
 
-    while (i<128 && Serial.available())
+    while (i<128 && Serial3.available())
     {
-        data_byte = Serial.read();
+        data_byte = Serial3.read();
 
         if(data_byte==END_CHAR)
         {
@@ -66,13 +66,18 @@ void mainModel(bool updated)
 void speedModel(bool updated)
 {
     // Request Speed information
-    Serial1.flush();
-    Serial1.print('S');
+    Serial3.flush();
+    Serial3.print('T');
+	delay(200);
 
     if (!updated)
     {
-        data = getSerialData(END_CHAR);
+        data = getSerialData(0x10);
         speedView(data);
+		
+			
+		Serial.print("T DATA: ");
+		Serial.println(data);
     }
     else
     {
@@ -88,12 +93,12 @@ void speedModel(bool updated)
 void altitudeModel(bool updated)
 {
     // Request Speed information
-    Serial1.flush();
-    Serial1.print('S');
+    Serial3.flush();
+    Serial3.print('T');
 
     if (!updated)
     {
-        data = getSerialData(END_CHAR);
+        data = getSerialData(0x10);
         altitudeView(data);
     }
     else
@@ -133,12 +138,15 @@ void tempModel(bool updated)
 {
     // Request Speed information
     Serial1.flush();
-    Serial1.print('S');
+    Serial1.print('T');
 
     if (!updated)
     {
         data = getSerialData(END_CHAR);
         tempView(data);
+		
+		Serial.print("T DATA: ");
+		Serial.println(data);
     }
     else
     {
