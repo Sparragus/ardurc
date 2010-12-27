@@ -5,14 +5,17 @@
 #include "arduRC_states.h"
 #include "arduRC_controller.h"
 
-#include <Math.h>
+#include <stdio.h>
 
+#include <Math.h>
 #include <Wire.h>
 
 #define __DEBUG 
 
 #define BUTTON_LEFT 2
 #define BUTTON_RIGHT 3
+#define BUTTON_CONTROL 18
+#define BUTTON_PICTURE 19
 
 #define LEFT 0
 #define RIGHT 1
@@ -22,7 +25,7 @@
 
 #define signal_rssi A1
 #define signal_led_red 41  //
-#define signal_led_green 39 //
+#define signal_led_green 39 //7
 #define signal_led_blue 37 //
 
 #define batt_status_in A2
@@ -69,6 +72,13 @@ int signal_status = 0;
 int throttle_status = 0;
 
 int throttle_value = 0;
+int throttle_value_mapped = 0;
+
+boolean armed_motors = false;
+
+boolean sendNavInfo = false;
+
+char navCommandNotArmed[27];
 
 void setup()
 {
@@ -91,7 +101,7 @@ void setup()
 	LCDInit();
 	LCDClear(WHITE);
 	
-	LCDSplashScreen();
+	//LCDSplashScreen();
 	
 
 	/**
@@ -163,12 +173,12 @@ void loop()
 	}
 	*/
 
-	//throttle();
+	throttle();
 	batteryStatus();
 	signalStatus();
 	
-	throttle_status = map(analogRead(throttle_pot_in), 0, 1023, 255, 0); 
-	analogWrite(throttle_led,throttle_status);
+	//throttle_status = map(analogRead(throttle_pot_in), 0, 1023, 255, 0); 
+	//analogWrite(throttle_led,throttle_status);
 	//Serial.println(throttle_status);
 	
 }
@@ -247,6 +257,32 @@ ISR(TIMER3_OVF_vect) {
 	//Serial.println("timer3");
 	TCNT3=0xFFFF - (synctime/0.016);;
 	//here we will send control data to the copter via xbee
+	
+		
+	//if(sendNavInfo)
+	if(false)
+	{
+
+	}
+	else
+	{
+		//Send default values:
+		// Pitch;Yaw;Roll;Throttle;Aux1HIGH;Aux2LOW;Aux31200
+		
+		//If not armed
+		if(!armed_motors)
+		{	
+			sprintf(navCommandNotArmed, "V1500;1498;1545;%d;2003;994;1200", throttle_value_mapped);
+		}
+		else
+		{
+			sprintf(navCommandNotArmed, "V1500;1498;1545;%d;2003;994;1400", throttle_value_mapped);
+		}
+		
+			Serial.print("NavCommand: ");
+			Serial.println(navCommandNotArmed);
+			Serial3.println(navCommandNotArmed);
+	}
 }
 
 void getGyroData(){
@@ -369,17 +405,21 @@ void signalStatus()
 	}
 }
 
-/*
+
 void throttle(){
 	throttle_value = analogRead(throttle_pot_in);
-	throttle_led_func(throttle_value);
+	
+	// Send throttle values to ArduCopter
+	throttle_value_mapped = map(throttle_value, 0, 1023, 1091,1895); 
+	
+	//throttle_led_func(throttle_value);
 }
 
 void throttle_led_func(int throttle_value){
-	throttle_status = map(throttle_value, 0, 1023, 255, 0); 
+	throttle_status = map(throttle_value, 0, 1023, 0, 255); 
 	analogWrite(throttle_led,throttle_status);
 }
-*/
+
 
 bool stateChanged()
 {
@@ -396,8 +436,8 @@ void initSerial(){
 	Serial.begin(9600);
 	Serial.println("Initialized Serial0!");
 
-	Serial1.begin(115200);
-	Serial1.println("Initialized Serial1!");
+	Serial3.begin(115200);
+	Serial3.println("Initialized Serial3!");
 
 }
 
@@ -440,16 +480,26 @@ void ioInit()
 	digitalWrite(SDL,LOW);
 	pinMode(SDL,OUTPUT);
 	
-	//Ports for ISR for Buttons
-	//Pins 2-3, 18-21
-	pinMode(BUTTON_LEFT, INPUT);
-	digitalWrite(BUTTON_LEFT, HIGH);
+	//Enable internal pull-up resistor for BUTTON_RIGHT
+	pinMode(BUTTON_RIGHT,INPUT);
+	digitalWrite(BUTTON_RIGHT,HIGH);
 	attachInterrupt(0, buttonLeft, FALLING);
-
-	pinMode(BUTTON_RIGHT, INPUT);
-	digitalWrite(BUTTON_RIGHT, HIGH);
+	
+	//Enable internal pull-up resistor for BUTTON_LEFT
+	pinMode(BUTTON_RIGHT,INPUT);
+	digitalWrite(BUTTON_RIGHT,HIGH);
 	attachInterrupt(1, buttonRight, FALLING);
 
+	//Enable internal pull-up resistor for BUTTON_CONTROL
+	pinMode(BUTTON_CONTROL,INPUT);
+	digitalWrite(BUTTON_CONTROL,HIGH);
+	attachInterrupt(5, buttonControl, FALLING);
+	
+	//Enable internal pull-up resistor for BUTTON_PICTURE
+	pinMode(BUTTON_PICTURE,INPUT);
+	digitalWrite(BUTTON_PICTURE,HIGH);
+	attachInterrupt(4, buttonPicture, FALLING);
+	
 	//Set pinMode for throttle potenciometer and led indicator
 	pinMode(throttle_pot_in, INPUT);
 	pinMode(throttle_led, OUTPUT);
@@ -540,14 +590,60 @@ void buttonRight()
 
 	Serial.println("button_right");
 	
-	//static unsigned long last_millis = 0;
-	//unsigned long m = millis();
-	//if (m - last_millis < 200)
-	//{
+	static unsigned long last_millis = 0;
+	unsigned long m = millis();
+	if (m - last_millis < 200)
+	{
 
-	//}
-	//else{
-	//	last_millis = m;
+	}
+	else{
+		last_millis = m;
 		stateManager(RIGHT);
-	//}
+	}
+}
+
+void buttonControl()
+{
+
+	Serial.println("button_control");
+
+	static unsigned long last_millis = 0;
+	unsigned long m = millis();
+	if (m - last_millis < 200)
+	{
+
+	}
+	else{
+		last_millis = m;
+		
+		
+		// Toggle sendNavInfo control var
+		sendNavInfo = !sendNavInfo;
+		
+		}
+		Serial.print ("Control: ");
+		sendNavInfo ? Serial.println("TRUE") : Serial.println("FALSE");
+}
+
+void buttonPicture()
+{
+
+	Serial.println("button_picture");
+
+	static unsigned long last_millis = 0;
+	unsigned long m = millis();
+	if (m - last_millis < 200)
+	{
+
+	}
+	else{
+		last_millis = m;
+		
+		
+		armed_motors = !armed_motors;
+		}
+		
+		Serial.print ("Motors: ");
+		armed_motors ? Serial.println("TRUE") : Serial.println("FALSE");
+
 }
